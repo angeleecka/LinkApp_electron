@@ -36,5 +36,110 @@
     <!-- <div id="pagination"></div> -->
 
     <script type="module" src="./main.js"></script>
+    <script>
+      /**
+       * Мини-зонд кликов:
+       * 1) Логирует ЛЮБОЙ клик на документе (в фазе capture).
+       * 2) Показывает, какой элемент реально под курсором (overlay-проверка).
+       * 3) Даёт две утилиты в консоли: listButtons() и inspectBtn(selector).
+       */
+      (function () {
+        // 1) Глобальный лог кликов — если это не срабатывает, клики блокируются где-то выше (оверлей)
+        window.addEventListener(
+          "click",
+          function (e) {
+            const x = e.clientX,
+              y = e.clientY;
+            const topEl = document.elementFromPoint(x, y);
+            const path = e.composedPath ? e.composedPath() : [];
+            console.log("[CAPTURE click]", {
+              x,
+              y,
+              target: e.target,
+              topEl,
+              pathFirst: path[0],
+            });
+          },
+          true
+        );
+
+        // 2) Утилита: список «кнопок», которые мы видим в DOM сейчас
+        window.listButtons = function () {
+          const nodes = Array.from(
+            document.querySelectorAll(
+              'button, [role="button"], [data-action], a[onclick]'
+            )
+          );
+          const rows = nodes.map((el, i) => {
+            const cs = getComputedStyle(el);
+            return {
+              i,
+              tag: el.tagName.toLowerCase(),
+              id: el.id || "",
+              class: el.className || "",
+              text: (el.innerText || "").trim().slice(0, 40),
+              visible: !(
+                cs.display === "none" ||
+                cs.visibility === "hidden" ||
+                cs.opacity === "0"
+              ),
+              disabled: !!(
+                el.disabled || el.getAttribute("aria-disabled") === "true"
+              ),
+              pointerEvents: cs.pointerEvents,
+            };
+          });
+          console.table(rows);
+          return rows;
+        };
+
+        // 3) Утилита: точечная проверка конкретной кнопки по селектору
+        window.inspectBtn = function (selector) {
+          const el = document.querySelector(selector);
+          if (!el) {
+            console.warn("inspectBtn: элемент не найден:", selector);
+            return null;
+          }
+          const r = el.getBoundingClientRect();
+          const topEl = document.elementFromPoint(
+            r.left + r.width / 2,
+            r.top + r.height / 2
+          );
+          const cs = getComputedStyle(el);
+          const info = {
+            exists: !!el,
+            text: (el.innerText || "").trim(),
+            centerTopEl: topEl
+              ? `${topEl.tagName.toLowerCase()}#${topEl.id}.${topEl.className}`
+              : null,
+            visible: !(
+              cs.display === "none" ||
+              cs.visibility === "hidden" ||
+              cs.opacity === "0"
+            ),
+            disabled: !!(
+              el.disabled || el.getAttribute("aria-disabled") === "true"
+            ),
+            pointerEvents: cs.pointerEvents,
+            zIndex: cs.zIndex,
+            hasOnclickProp: typeof el.onclick === "function",
+          };
+          console.table(info);
+          return info;
+        };
+
+        // 4) Быстрый обзор подключённых скриптов — вдруг нужный не загрузился
+        window.listScripts = function () {
+          const rows = Array.from(document.scripts).map((s, i) => ({
+            i,
+            type: s.type || "classic",
+            src: s.src || "(inline)",
+            module: s.type === "module",
+          }));
+          console.table(rows);
+          return rows;
+        };
+      })();
+    </script>
   </body>
 </html>

@@ -81,6 +81,39 @@
   font-size: 1.1em;
 }
 
+/* После строки 82 */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
+  overflow: visible; /* ← добавьте */
+}
+
+/* Ограничьте max-width для input-wrap */
+.header-right .quick-add {
+  flex: 1 1 360px;
+  max-width: 360px; /* ← добавьте */
+  min-width: 180px;
+}
+
+.header-right .search-box {
+  flex: 0 1 auto;
+  max-width: 280px; /* ← добавьте */
+  min-width: 200px;
+}
+
+/* Заставьте кнопки быть поверх */
+.header-right .icon-btn {
+  position: relative; /* ← добавьте */
+  z-index: 20; /* ← добавьте */
+}
+.header-right .input-wrap {
+  position: relative;
+  z-index: 10; /* ниже кнопок */
+}
 /* Universal small icon button */
 .icon-btn {
   flex: 0 0 auto;

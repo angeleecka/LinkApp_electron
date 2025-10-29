@@ -1,12 +1,15 @@
 // =============================================================================
-// UI/MODAL-SERVICE.JS — Единый сервис для создания модальных окон --- изменялся!!!
+// UI/MODAL-SERVICE.JS — Единый сервис для создания модальных окон
 // =============================================================================
 // Что здесь:
 // - Универсальная функция openModal() для создания модалок
 // - Поддержка заголовка, тела, footer (опционально)
 // - Закрытие по клику на overlay, крестик или Escape
 // - Callback onClose при закрытии
+// - Подключение к eventBus для работы через события
 // =============================================================================
+
+import { eventBus } from "../core/event-bus.js";
 
 /**
  * Открыть модальное окно
@@ -80,4 +83,42 @@ export function openModal({
   window.addEventListener("keydown", onKey);
 
   return { close };
+}
+
+// =============================================================================
+// ПОДКЛЮЧЕНИЕ К EVENT BUS
+// =============================================================================
+
+/**
+ * Инициализация сервиса модальных окон
+ * Подписываемся на события открытия модалок
+ */
+export function initModalService() {
+  // Универсальная модалка через eventBus
+  eventBus.on("modal:custom:open", ({ title, bodyHTML, onMount, onClose }) => {
+    const modal = openModal({ title, bodyHTML, onClose, showFooter: false });
+
+    // Если есть callback onMount — вызываем его, передав root элемент модалки
+    if (onMount) {
+      const modalBody = document.querySelector(".modal-body");
+      if (modalBody) {
+        // Даём браузеру время отрендерить модалку
+        setTimeout(() => {
+          onMount(modalBody);
+        }, 0);
+      }
+    }
+
+    return modal;
+  });
+
+  // Закрытие модалки
+  eventBus.on("modal:close", () => {
+    const overlay = document.querySelector(".modal-overlay");
+    if (overlay) {
+      overlay.remove();
+    }
+  });
+
+  console.log("✅ Modal service initialized and connected to eventBus");
 }

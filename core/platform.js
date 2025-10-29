@@ -1,82 +1,47 @@
 // core/platform.js
-// Единая платформа: хранение состояния + открытие ссылок.
-// В ВЕБЕ: НИЧЕГО не пишем в localStorage (этим занимается storage.js).
-// В ELECTRON: работаем через window.electronAPI из preload.
-//
-// Требуемые методы на preload-API:
-// - readText(file), writeText(file, text)
-// - openExternal(url)
-// - detectBrowsers()            (опционально)
-// - getUserDataPath()           (опционально)
-
 import { launcher } from "../platform/launcher-web.js";
 
-export const isElectron = typeof window !== "undefined" && !!window.electronAPI;
+// мост из preload (exposeInMainWorld)
+const bridge = globalThis.desktop;
+export const isElectron = !!bridge;
 
 export const platform = {
   env() {
     return isElectron ? "electron" : "browser";
   },
 
-  // ===================== ХРАНЕНИЕ СОСТОЯНИЯ =====================
-  // storage.init() сначала грузит localStorage, затем
-  // вызывает platform.loadAppState() "на догрузку/override".
-  // В браузере возвращаем null => ничего не переопределяем.
+  // В браузере вернуть null (storage сам читает localStorage).
   async loadAppState() {
-    if (isElectron && window.electronAPI?.readText) {
+    if (isElectron && bridge.platform?.loadAppState) {
       try {
-        return await window.electronAPI.readText("state.json");
-      } catch (e) {
-        console.warn("[platform] readText failed:", e);
-        return null;
-      }
+        return await bridge.platform.loadAppState();
+      } catch {}
     }
-    // Веб: не трогаем localStorage — он уже обслуживается в storage.js
     return null;
   },
 
   async saveAppState(jsonText) {
-    if (isElectron && window.electronAPI?.writeText) {
+    if (isElectron && bridge.platform?.saveAppState) {
       try {
-        await window.electronAPI.writeText("state.json", jsonText);
-      } catch (e) {
-        console.warn("[platform] writeText failed:", e);
-      }
+        await bridge.platform.saveAppState(String(jsonText ?? ""));
+        return;
+      } catch {}
     }
-    // Веб: no-op. storage.save() уже записал в localStorage ("linkapp-data").
+    // в вебе сохранение делает storage.save() -> localStorage
   },
 
-  // ===================== ОТКРЫТИЕ ССЫЛОК =====================
   openExternal(url) {
-    if (isElectron && window.electronAPI?.openExternal) {
-      return window.electronAPI.openExternal(url);
+    if (isElectron && bridge.platform?.openExternal) {
+      return bridge.platform.openExternal(String(url));
     }
-    // Браузер: открываем в новой вкладке через адаптер
-    return launcher.openUrl(url);
+    return launcher.openUrl(String(url));
   },
 
-  // (опционально) детект установленных браузеров в desktop-хосте
   async detectInstalledBrowsers() {
-    if (isElectron && window.electronAPI?.detectBrowsers) {
-      try {
-        return await window.electronAPI.detectBrowsers();
-      } catch (e) {
-        console.warn("[platform] detectBrowsers failed:", e);
-      }
-    }
-    // Веб: только "system"
     return launcher.detectInstalledBrowsers();
   },
 
-  // (опционально) путь к userData (веб — null)
   async getUserDataPath() {
-    if (isElectron && window.electronAPI?.getUserDataPath) {
-      try {
-        return await window.electronAPI.getUserDataPath();
-      } catch {
-        /* ignore */
-      }
-    }
     return null;
   },
 };

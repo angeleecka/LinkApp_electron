@@ -13,6 +13,8 @@ import { eventBus } from "./core/event-bus.js";
 import { config } from "./core/config.js";
 import { storage } from "./core/storage.js";
 import { app } from "./core/app.js";
+
+import { initModalService } from "./ui/modal-service.js";
 import { initStatusBar } from "./ui/statusbar.js";
 
 // Модули темы
@@ -71,6 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("✅ Storage initialized");
 
   // ===== ШАГ 5: ИНИЦИАЛИЗАЦИЯ UI-МОДУЛЕЙ =====
+  initModalService();
   initHeader(); // Шапка приложения
   initButtons(); // Логика кнопок-ссылок
   initSections(); // Логика секций

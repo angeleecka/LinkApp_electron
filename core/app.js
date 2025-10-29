@@ -1,4 +1,4 @@
-// core/app.js --- изменялся!!!
+// core/app.js
 
 import { eventBus } from "./event-bus.js";
 import { storage } from "./storage.js";
