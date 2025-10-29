@@ -1,0 +1,166 @@
+/* =============================================================================
+     СТАТУС-БАР (FOOTER)
+     ============================================================================= */
+.app-status {
+  position: sticky;
+  bottom: 0;
+  background: var(--surface-1);
+  border-top: 1px solid var(--border);
+  z-index: 5;
+}
+
+.app-status:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+/* Статусбар без внешних отступов, фикс высоты — из темы или из контента */
+#app-status {
+  margin-top: 0 !important;
+
+  height: var(--statusbar-h, 28px);
+  line-height: var(--statusbar-h, 28px);
+  padding: 0 12px; /* без вертикальных паддингов, чтобы высота совпадала с токеном */
+  display: flex;
+  align-items: center;
+}
+
+/* Корневой блок статусбара уже есть (#app-status).
+   Добавим аккуратную вёрстку и элементы. */
+#app-status .statusbar {
+  max-width: var(--content-max, 1100px);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 12px;
+}
+
+#app-status .status-item {
+  opacity: 0.95;
+}
+#app-status .status-item strong {
+  font-weight: 600;
+}
+#app-status .status-sep {
+  opacity: 0.5;
+}
+#app-status .status-spacer {
+  flex: 1 1 auto;
+}
+
+/* Кнопка темы: как маленький «чип» */
+#app-status .theme-toggle {
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  line-height: 1;
+  cursor: pointer;
+}
+#app-status .theme-toggle:hover {
+  background: var(--surface-2);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Метка поиска — слегка выделим */
+#app-status .status-item.query {
+  font-style: italic;
+  opacity: 1;
+}
+
+/* нижняя «линза» уже есть в твоих темах; при желании можно усилить:
+  #app-status { background: var(--surface-1); border-top: 1px solid var(--border); }
+  */
+
+.status-left,
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-theme-btn {
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.status-theme-btn:hover {
+  background: var(--surface-2);
+  border-color: var(--accent);
+}
+
+.statusbar .divider {
+  opacity: 0.6;
+}
+
+/* ===== STATUSBAR: single-line, no-wrap, mobile-friendly ===== */
+#app-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  /* Ключевые флаги для однострочности */
+  flex-wrap: nowrap;
+  white-space: nowrap;
+
+  /* Если совсем узко — даём горизонтальную прокрутку вместо переноса */
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable both-edges;
+
+  /* Подстрахуем высоту, чтобы тело не «подпрыгивало» */
+  min-height: var(--statusbar-h, 28px);
+}
+
+/* Дефолт: элементы статусбара — фиксированной ширины (не растягиваются) */
+#app-status > * {
+  flex: 0 0 auto;
+}
+
+/* Элемент, который может «сжиматься» и обрезаться троеточием.
+   Применится, если в разметке будет класс .status-flex (см. ниже «опционально»). */
+#app-status .status-flex {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Кнопку темы прижимаем вправо (если она последняя — просто будет «к правому краю») */
+#app-status .status-theme-btn {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+/* Чуть компактнее на телефонах */
+@media (max-width: 640px) {
+  #app-status {
+    gap: 6px;
+    padding-inline: 8px;
+  }
+  #app-status .status-theme-btn {
+    padding: 4px 8px;
+  }
+  /* Если есть второстепенные элементы — можно пометить их классом .hide-on-mobile */
+  #app-status .hide-on-mobile {
+    display: none;
+  }
+}
+
+/* (опционально) чуть приглушим горизонтальную полоску прокрутки */
+#app-status::-webkit-scrollbar {
+  height: 8px;
+}
+#app-status::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb);
+  border-radius: var(--sb-radius);
+  border: 2px solid var(--sb-track);
+}

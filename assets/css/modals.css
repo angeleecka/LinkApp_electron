@@ -1,0 +1,333 @@
+/* =============================================================================
+     МОДАЛКИ
+     ============================================================================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  width: min(600px, 92vw);
+  max-height: 85vh;
+  background: var(--bg);
+  color: var(--text);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Шапка модалки */
+.modal-header {
+  padding: 14px 16px;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px; /* NEW */
+  /* justify-content: space-between;  <-- УДАЛИТЬ */
+}
+
+/* Логотип слева без изменения HTML */
+.modal-header::before {
+  content: "";
+  width: 20px; /* можно 24px, если хочется крупнее */
+  height: 20px;
+  flex: 0 0 20px;
+  background: url("../icons/logo.png") no-repeat center / contain; /* путь из assets/css → ../icons */
+  opacity: 0.95;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  flex: 1; /* NEW: растягиваем заголовок, чтобы .modal-close прижался вправо */
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  transition: color var(--dur-1), background var(--dur-1);
+}
+
+.modal-close:hover {
+  color: #ff4444;
+  background: var(--surface-2);
+}
+
+/* Тело модалки */
+.modal-body {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Поля ввода в модалках */
+.modal-field {
+  margin-bottom: 14px;
+}
+
+.modal-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.modal-field input[type="text"],
+.modal-field input[type="url"],
+.modal-field input[type="email"],
+.modal-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text);
+  font-size: 1em;
+  transition: border-color var(--dur-1), background var(--dur-1);
+  box-sizing: border-box;
+}
+
+.modal-field input:focus,
+.modal-field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg);
+}
+
+/* Группа кнопок в модалке */
+.modal-buttons-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+/* Кнопки в модалках */
+.modal-buttons-group .btn {
+  flex: 1;
+  min-width: 100px;
+}
+
+.modal-buttons-group .btn.save {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.modal-buttons-group .btn.save:hover {
+  opacity: 0.9;
+}
+
+.modal-buttons-group .btn.delete {
+  background: #ff4444;
+  color: white;
+  border-color: #ff4444;
+}
+
+.modal-buttons-group .btn.delete:hover {
+  opacity: 0.9;
+}
+
+.modal-buttons-group .btn.cancel {
+  background: var(--surface-1);
+  color: var(--text);
+}
+
+/* Нижняя часть модалки (footer) */
+.modal-footer,
+.modal-actions {
+  padding: 12px 16px;
+  background: var(--surface-1);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Кнопки в модалках: общий вид */
+.modal-actions .btn,
+.modal-footer .btn {
+  font: inherit;
+  line-height: 1.15;
+  padding: 8px 12px; /* вернули вертикальные отступы */
+  min-height: 32px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text);
+
+  cursor: pointer;
+  transition: background var(--dur-1), border-color var(--dur-1),
+    box-shadow var(--dur-1);
+}
+
+.modal-actions .btn:hover,
+.modal-footer .btn:hover {
+  background: var(--surface-2);
+  border-color: var(--accent);
+}
+
+.modal-actions .btn:focus-visible,
+.modal-footer .btn:focus-visible {
+  outline: 2px solid var(--focus-border, rgba(0, 128, 255, 0.45));
+  outline-offset: 2px;
+}
+
+/* Варианты (если используешь эти классы) */
+.modal-actions .btn.save {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.modal-actions .btn.save:hover {
+  filter: brightness(0.95);
+}
+
+.modal-actions .btn.delete {
+  background: var(--warn);
+  border-color: var(--warn);
+  color: #5b2a24; /* контрастный текст на варне */
+}
+/* === НОРМАЛИЗАЦИЯ КНОПОК ВО ВСЕХ ЗОНАХ МОДАЛКИ ===
+   Покрываем: .modal-actions, .modal-footer, .modal-buttons-group
+   И button, и .btn. Исключаем крестик закрытия .modal-close.
+*/
+.modal
+  :is(.modal-actions, .modal-footer, .modal-buttons-group)
+  :is(button, .btn):not(.modal-close) {
+  font: inherit;
+  line-height: 1.15;
+  padding: 8px 12px; /* вернули вертикальные отступы */
+  min-height: 32px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text);
+
+  cursor: pointer;
+  transition: background var(--dur-1), border-color var(--dur-1),
+    box-shadow var(--dur-1);
+}
+
+.modal
+  :is(.modal-actions, .modal-footer, .modal-buttons-group)
+  :is(button, .btn):not(.modal-close):hover {
+  background: var(--surface-2);
+  border-color: var(--accent);
+}
+
+.modal
+  :is(.modal-actions, .modal-footer, .modal-buttons-group)
+  :is(button, .btn):not(.modal-close):focus-visible {
+  outline: 2px solid var(--focus-border, rgba(0, 128, 255, 0.45));
+  outline-offset: 2px;
+}
+
+/* Варианты (если используешь классы save/delete) */
+.modal :is(.modal-actions, .modal-footer, .modal-buttons-group) .btn.save {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.modal
+  :is(.modal-actions, .modal-footer, .modal-buttons-group)
+  .btn.save:hover {
+  filter: brightness(0.95);
+}
+.modal :is(.modal-actions, .modal-footer, .modal-buttons-group) .btn.delete {
+  background: var(--warn);
+  border-color: var(--warn);
+  color: #5b2a24;
+}
+
+/* About → Hotkeys */
+.hotkeys-title {
+  margin: 12px 0 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.hotkeys-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 6px 0 8px;
+}
+.hotkeys-table td {
+  padding: 6px 8px;
+  vertical-align: top;
+  border-top: 1px dashed var(--border);
+}
+.hotkeys-table tr:first-child td {
+  border-top: 0;
+}
+.hotkeys-table td:first-child {
+  width: 52%;
+  color: var(--text);
+}
+.hotkeys-note {
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 0.95em;
+}
+
+/* Универсальный вид для <kbd> под темы */
+kbd {
+  font: 600 0.92em/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--text);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-bottom-color: color-mix(in oklab, var(--border), black 12%);
+  padding: 2px 6px;
+  border-radius: 6px;
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--border), black 12%);
+  white-space: nowrap;
+}
+
+/* =============================================================================
+     АДАПТИВНОСТЬ (МОБИЛЬНЫЕ УСТРОЙСТВА)
+     ============================================================================= */
+
+@media (max-width: 768px) {
+  .modal {
+    width: 95vw;
+  }
+}

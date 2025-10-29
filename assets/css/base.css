@@ -1,0 +1,183 @@
+/* 
+ * base.css — базовые токены темы + легкий reset
+ * ---------------------------------------------
+ * Идея: никакого "жёсткого" цвета в компонентах.
+ * Все цвета/отступы/радиусы — только через var(--token).
+ * 
+ * Режимы темы:
+ *   data-theme="light"  — светлая
+ *   data-theme="dark"   — тёмная
+ *   data-theme="system" — следуем системной (prefers-color-scheme)
+ */
+
+/* Сброс/база */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue",
+    Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  font-size: 14px;
+  color-scheme: light dark; /* подсказка браузеру для корректных UI */
+}
+
+/* Палитра (базовая, не используется напрямую в компонентах) */
+:root {
+  /* Светлая палитра */
+  --_light-bg: #ffffff;
+  --_light-surface-1: #fafafa;
+  --_light-surface-2: #f3f4f6;
+  --_light-border: #e5e7eb;
+  --_light-text: #111827;
+  --_light-text-muted: #6b7280;
+  --_light-accent: #3b82f6;
+
+  /* Тёмная палитра */
+  --_dark-bg: #0b0d12;
+  --_dark-surface-1: #111319;
+  --_dark-surface-2: #1a1d24;
+  --_dark-border: #2a2f3a;
+  --_dark-text: #e5e7eb;
+  --_dark-text-muted: #9ca3af;
+  --_dark-accent: #60a5fa;
+
+  /* фолбэки, если тема не задаёт спец-цвета шапки */
+  --header-bg: var(--surface, #fff);
+  --header-fg: var(--text, #111);
+
+  /* Размерности/радиусы/тени/скорости — стабильные токены */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --shadow-1: 0 10px 30px rgba(0, 0, 0, 0.25);
+  --dur-1: 120ms;
+
+  --sb-size: 10px; /* толщина */
+  --sb-radius: 8px; /* скругление бегунка */
+  --sb-track: var(--surface-1); /* трек */
+  --sb-thumb: var(--border); /* бегунок */
+  --sb-thumb-hover: var(--accent); /* бегунок при hover */
+
+  --z-header: 100;
+  --z-popover: 3000;
+  --z-modal: 1000;
+  --z-toast: 2000;
+}
+
+/* ====== СЕМАНТИЧЕСКИЕ ТОКЕНЫ (по умолчанию — светлая) ======
+ * Компоненты используют только эти var(), без знания темы.
+ */
+:root {
+  --bg: var(--_light-bg);
+  --surface-1: var(--_light-surface-1);
+  --surface-2: var(--_light-surface-2);
+  --border: var(--_light-border);
+  --text: var(--_light-text);
+  --text-muted: var(--_light-text-muted);
+  --accent: var(--_light-accent);
+  --overlay: rgba(0, 0, 0, 0.4);
+  /* Search highlight */
+  --hl-underline: var(--accent);
+  --hl-bg: transparent;
+  --hl-text: inherit;
+  --z-header: 100;
+  --z-popover: 400;
+  --z-modal: 1000;
+  --z-toast: 2000;
+}
+
+/* Общие базовые применения */
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+:root {
+  --statusbar-h: 28px; /* высота статусбара (подстрой при желании) */
+  --pagination-h: 44px; /* примерная высота блока пагинатора */
+  --gap-8: 8px;
+  --gap-12: 12px;
+
+  /* NEW: универсальные фоны состояний и «чипа» активной страницы */
+  --btn-hover-bg: rgba(0, 0, 0, 0.06);
+  --btn-active-bg: rgba(0, 0, 0, 0.12);
+
+  /* Активный ярлык в пагинаторе */
+  --chip-active-bg: var(--btn-active-bg);
+  --chip-active-border: var(--accent);
+  --chip-active-fg: var(--accent);
+}
+
+/* base.css — нейтральный reset, не меняет внешний вид */
+.btn {
+  font: inherit;
+  line-height: 1;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+/* Универсальная кнопка-иконка */
+.ui-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px; /* минимальная «мишень» */
+  min-height: 28px;
+  padding: 4px 6px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  border-radius: 6px;
+  cursor: pointer;
+  line-height: 1;
+  opacity: 0.75;
+}
+.ui-icon-btn:hover {
+  opacity: 1;
+  background: var(--btn-hover-bg, rgba(0, 0, 0, 0.06));
+}
+html[data-theme="dark"] .ui-icon-btn:hover {
+  background: var(--btn-hover-bg, rgba(255, 255, 255, 0.08));
+  --btn-hover-bg: rgba(255, 255, 255, 0.08);
+  --btn-active-bg: rgba(255, 255, 255, 0.16);
+
+  --chip-active-bg: rgba(255, 255, 255, 0.12);
+  --chip-active-border: var(--accent);
+  --chip-active-fg: var(--text);
+}
+
+/* Размеры иконок (подбирай один для всего UI) */
+.ui-icon-14 {
+  font-size: 14px;
+}
+.ui-icon-16 {
+  font-size: 16px;
+} /* обычно достаточно этого одного */
+
+/* Firefox */
+* {
+  scrollbar-width: thin; /* auto|thin|none */
+  scrollbar-color: var(--sb-thumb) var(--sb-track);
+}
+
+/* WebKit/Blink (Chrome/Edge/Safari) */
+*::-webkit-scrollbar {
+  width: var(--sb-size);
+  height: var(--sb-size);
+}
+*::-webkit-scrollbar-track {
+  background: var(--sb-track);
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--sb-thumb);
+  border-radius: var(--sb-radius);
+  border: 2px solid var(--sb-track); /* визуальная «впадинка» */
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--sb-thumb-hover);
+}

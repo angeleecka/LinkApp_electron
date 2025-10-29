@@ -1,0 +1,23 @@
+# Node
+node_modules/
+desktop/node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Сборки/кэш
+dist/
+build/
+.cache/
+.tmp/
+
+# ОС-мусор
+.DS_Store
+Thumbs.db
+
+# Экспортированные данные приложения (если сохраняешь рядом)
+LinkApp-data.json
+
+# Этим файлом Electron хранит состояние в системной папке, в репо он не появится,
+# но на всякий случай игнорим любые временные файлы:
+*.tmp

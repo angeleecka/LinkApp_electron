@@ -1,0 +1,255 @@
+/* =============================================================================
+   LAYOUT.CSS — КАРКАС ПРИЛОЖЕНИЯ
+   ============================================================================= */
+
+/* Глобально: предотвращаем горизонтальный скролл окна */
+html,
+body,
+#linkapp-root {
+  overflow-x: clip;
+}
+
+/* База высоты страницы — безопасно оставить */
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+/* Внутренние поля у краёв окна */
+#linkapp-root {
+  padding-inline: var(--page-gutter, 16px);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Единая «резиновая колонка» по центру для основных блоков */
+#app-header,
+#app-body,
+#pagination,
+#app-status {
+  max-width: var(--content-max, 1100px);
+  margin-inline: auto;
+  width: 100%;
+}
+
+/* Основной скроллируемый контент */
+#app-body {
+  flex: 1 1 auto;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: var(--computed-body-min-h, auto); /* выставляет JS */
+  padding-bottom: calc(
+    var(--statusbar-h, 28px) + var(--pagination-h, 44px) + 8px
+  );
+}
+
+/* Состояние «нет данных» */
+.body-empty {
+  opacity: 0.7;
+  font-size: 1em;
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
+
+.sessions-table {
+  display: grid;
+  gap: 6px;
+}
+.sessions-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+}
+.sessions-row .cell.name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.sessions-row .cell.meta {
+  opacity: 0.8;
+  font-size: 0.9em;
+}
+.sessions-row .cell.actions {
+  display: inline-flex;
+  gap: 6px;
+  justify-self: end;
+}
+
+.file-menu-wrap {
+  position: relative;
+  display: inline-block;
+}
+.file-menu-popover {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 220px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-1);
+  padding: 6px;
+  z-index: 20;
+}
+.file-menu-popover[hidden] {
+  display: none;
+}
+.file-menu-popover > button {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.file-menu-popover > button:hover {
+  background: var(--surface-2);
+}
+.file-menu-popover > hr {
+  border: 0;
+  height: 1px;
+  background: var(--border);
+  margin: 6px 0;
+}
+
+/* упрощённая табличка в модалке "Open…" */
+.saves-list {
+  display: grid;
+  gap: 8px;
+}
+.saves-list .row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+}
+.saves-list .row .n {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.saves-list .row .d {
+  opacity: 0.8;
+  font-size: 0.9em;
+}
+.saves-list .row .btn {
+  justify-self: end;
+}
+
+/* === Burger popover: hard reset & elevate (должно быть самым последним) === */
+.header-burger-popover {
+  position: fixed !important; /* вне потока и вне хедера */
+  z-index: 2147483646 !important; /* выше всего контента */
+  inset: auto auto auto auto; /* JS ставит top/right */
+  background-color: var(--header-bg, #111) !important; /* цвет шапки; фолбэк */
+  color: var(--header-fg, #fff) !important;
+  border: 1px solid var(--header-border, rgba(0, 0, 0, 0.15)) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  border-radius: 10px !important;
+  padding: 8px !important;
+  opacity: 1 !important; /* убиваем случайную полупрозрачность */
+  backdrop-filter: none !important; /* и фоновые размытия */
+  -webkit-backdrop-filter: none !important;
+  pointer-events: auto !important;
+  isolation: isolate !important; /* свой стек рисования */
+}
+
+.header-burger-popover[hidden] {
+  display: none !important;
+}
+
+.header-burger-popover .label {
+  line-height: 1.2;
+}
+
+.header-burger-popover .mi svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* Тема с «светлой» шапкой — гарантируем читаемость */
+.theme-sea .header-burger-popover,
+.theme-light .header-burger-popover {
+  background-color: var(--header-bg, #f4f6f8) !important;
+  color: var(--header-fg, #0b1220) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* На всякий: любой странный смешанный режим — отключить внутри поповера */
+.header-burger-popover,
+.header-burger-popover * {
+  mix-blend-mode: normal !important;
+}
+
+/* ===== MOBILE EDGE-TO-EDGE ===== */
+@media (max-width: 900px) {
+  /* убираем боковые поля у корня */
+  #linkapp-root {
+    --page-gutter: 0;
+  }
+
+  /* эти блоки больше не ограничиваем по max-width */
+  #app-header,
+  #app-status {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+  }
+
+  /* шапка внутри — тоже без центрального "контейнера" */
+  .app-header .header-inner {
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: 8px; /* лёгкий внутренний отступ */
+  }
+
+  /* тело пусть остаётся «внутри» — компактные поля по бокам */
+  #app-body {
+    padding-inline: 8px;
+  }
+}
+
+/* статусбар — гарантированно в одну строку и без вылазов */
+#app-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow-x: auto; /* если тесно — аккуратный горизонтальный скролл */
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+#app-status > * {
+  flex: 0 0 auto;
+}
+#app-status .status-flex {
+  /* пометь этим классом самый длинный текст */
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Theme-кнопка прижимается вправо */
+#app-status .status-theme-btn {
+  margin-left: auto;
+  flex: 0 0 auto;
+}

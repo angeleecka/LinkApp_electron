@@ -1,0 +1,75 @@
+/* panel.css — правая панель плагина и отжим контента */
+
+:root {
+  --panel-w: 360px; /* ширина панели; потом можно сделать настраиваемой */
+}
+
+/* Фиксированная правая панель */
+.study-panel {
+  position: fixed;
+  inset: 0 0 0 auto; /* top:0; right:0; bottom:0 */
+  width: var(--panel-w);
+  background: var(--surface-1);
+  border-left: 1px solid var(--border);
+  z-index: 50;
+
+  display: none; /* по умолчанию скрыта */
+  flex-direction: column;
+}
+
+/* Показываем, когда включен режим */
+.with-study-panel .study-panel {
+  display: flex;
+}
+
+/* Отжим всего приложения вправо, чтобы панель не перекрывала */
+.with-study-panel #linkapp-root {
+  padding-right: calc(var(--panel-w) + 16px);
+}
+
+/* Заголовок панели */
+.study-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.study-title {
+  font-weight: 600;
+}
+
+/* Тело панели */
+.study-panel-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: 12px;
+  gap: 12px;
+}
+
+/* Бар месяца (временный) */
+.study-monthbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Сетка недель/дней — позже наполним данными */
+.study-weekgrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  min-height: 120px;
+}
+
+/* Когда панель открыта — LinkApp становится «двухколоночным» на десктопе */
+@media (min-width: 1024px) {
+  .with-study-panel .assignments-grid.grid-mode {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

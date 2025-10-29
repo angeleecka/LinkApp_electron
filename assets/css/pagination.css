@@ -1,0 +1,226 @@
+/* ===== Pagination (isolated) ===== */
+
+/* Контейнер: один ряд, без щелей, сидит ровно над статусбаром */
+#pagination {
+  position: sticky;
+  bottom: var(--statusbar-h, 28px);
+  z-index: 5;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 8px;
+
+  padding: 2px 8px;
+  margin: 8px 12px 0 12px;
+
+  background: var(--pagination-bg, var(--surface, #fff));
+  border-top: 1px solid
+    var(--pagination-divider, var(--border, rgba(0, 0, 0, 0.12)));
+  border-radius: 0;
+
+  /* важно: не обрезаем детей (иначе пропадают стрелки/крестики) */
+  overflow: visible !important;
+
+  max-width: var(--content-max, 1100px);
+  width: 100%;
+  margin-inline: auto !important; /* центр блока */
+  /* на всякий случай: */
+  left: auto;
+  right: auto; /* если кто-то задавал позиционирование */
+}
+
+/* Горизонтальная лента с ярлыками страниц (одна строка, скролл по X) */
+#pagination .pagination-scroll {
+  flex: 1 1 auto; /* лента может сжиматься */
+  min-width: 0; /* критично для сжатия */
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  /* скрываем системный горизонт. скроллбар */
+  scrollbar-width: none;
+  padding-inline: 8px; /* «гуттеры» внутри ленты */
+  box-sizing: border-box;
+  scroll-padding-inline: 8px; /* куда прилипает scrollIntoView */
+  scrollbar-gutter: stable both-edges; /* без дёрганий из-за полосы прокрутки */
+}
+
+/* Кнопки (включая ◀ ▶ +) — нейтральные */
+#pagination .pagination-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  padding: 4px 8px;
+  min-height: 28px;
+  line-height: 1;
+  font: inherit;
+  color: inherit;
+
+  cursor: pointer;
+  flex: 0 0 auto;
+  opacity: 0.95;
+}
+
+#pagination .pagination-btn:hover:not(:disabled) {
+  background: var(--btn-hover-bg, rgba(0, 0, 0, 0.06));
+  opacity: 1;
+}
+
+/* Активный ярлык страницы (и через aria-current для надёжности) */
+#pagination .pagination-btn.active,
+#pagination .page-number[aria-current="page"] {
+  background: var(--chip-active-bg);
+
+  color: var(--chip-active-fg);
+  font-weight: 600;
+  border-radius: 6px; /* мягкий намёк, без «пилюль» */
+  border-left: solid 1px var(--chip-active-fg);
+  outline: none;
+}
+
+/* делаем крестик активной вкладки чуть заметнее */
+#pagination .page-number.active .page-close,
+#pagination .page-number[aria-current="page"] .page-close {
+  opacity: 0.9;
+  color: var(--chip-active-fg);
+}
+
+#pagination .pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Ярлык страницы + крестик удаления */
+#pagination .page-number {
+  white-space: nowrap;
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  --page-close-w: 16px;
+  padding-right: calc(var(--page-close-w) + 8px); /* было 18px — иногда мало */
+  max-width: 220px; /* можно подстроить */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  scroll-margin-left: 8px;
+}
+
+#pagination .page-number:last-child {
+  scroll-margin-right: 8px;
+}
+
+#pagination .page-number .page-close {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  width: var(--page-close-w);
+  height: var(--page-close-w);
+  transform: translateY(-50%);
+  line-height: 1;
+  opacity: 0.6;
+  display: inline;
+  opacity: 0.55;
+  cursor: pointer;
+  color: var(--chip-active-fg);
+}
+
+#pagination .page-number:hover .page-close,
+#pagination .page-number.active .page-close {
+  display: inline-block;
+  color: var(--accent);
+}
+
+#pagination .page-number .page-close:hover {
+  opacity: 1;
+  color: var(--chip-active-fg);
+}
+
+#pagination.flex {
+  overflow: visible !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important; /* порядок: ◀ [лента] ▶ [+] */
+  align-items: center !important;
+}
+
+#pagination .pagination-scroll::-webkit-scrollbar {
+  height: 0;
+}
+
+/* Небольшие правки для тёмной темы (остальное берётся из твоих токенов) */
+html[data-theme="dark"] #pagination {
+  background: var(--pagination-bg, rgba(20, 20, 20, 0.96));
+  border-top-color: var(--pagination-divider, rgba(255, 255, 255, 0.12));
+}
+html[data-theme="dark"] #pagination .pagination-btn:hover:not(:disabled) {
+  background: var(--btn-hover-bg, rgba(255, 255, 255, 0.08));
+}
+html[data-theme="dark"] #pagination .pagination-btn.active {
+  background: var(--btn-active-bg, rgba(255, 255, 255, 0.14));
+}
+
+/* Дозапас снизу под липкий блок в теле (чтобы контент не прятался) */
+#app-body {
+  /* min-height вычисляется в JS, тут только отступ снизу */
+  padding-bottom: calc(
+    var(--statusbar-h, 28px) + var(--pagination-h, 44px) + 8px
+  );
+}
+
+/* ===== DnD для страниц (пагинатор) ===== */
+#pagination .page-drop-marker {
+  width: 2px;
+  height: 22px;
+  background: var(--accent);
+  border-radius: 1px;
+  box-shadow: 0 0 8px var(--accent);
+  display: inline-block;
+  vertical-align: middle;
+}
+
+#pagination .page-number.dragging {
+  opacity: 0.6;
+}
+/* ===== Drag handle на ярлыках страниц ===== */
+#pagination .page-number {
+  display: inline-flex; /* чтобы ручка/лейбл/крестик выстроились в ряд */
+  align-items: center;
+  gap: 6px;
+  position: relative; /* для .page-close */
+}
+
+#pagination .page-handle {
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0.55;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: element;
+}
+#pagination .page-number:hover .page-handle {
+  opacity: 0.85;
+}
+#pagination .page-number.dragging .page-handle {
+  cursor: grabbing;
+  opacity: 1;
+}
+
+/* лейбл отдельно (на будущее, если захочешь обрезать текст именно тут) */
+#pagination .page-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* крестик остаётся как был: абсолют справа (если так у тебя сейчас) */
+/* #pagination .page-number .page-close { ... } */
+
+/* =============================================================================
+     АДАПТИВНОСТЬ (МОБИЛЬНЫЕ УСТРОЙСТВА)
+     ============================================================================= */

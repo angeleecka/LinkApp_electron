@@ -1,0 +1,223 @@
+/* =========================================================
+   THEME VARIABLES — semantic tokens per data-theme
+   (src/ui/styles/theme.css — CLEAN)
+   ========================================================= */
+
+/* ---------- LIGHT ---------- */
+html[data-theme="light"] {
+  /* Header tokens (SOLID, used by header & burger popover) */
+  --header-bg: #484a47; /* тёмная шапка */
+  --header-fg: #e0ac9d; /* светлый текст/иконки */
+  --header-border: #e0ac9d;
+
+  /* Page tokens */
+  --bg: #e0ac9d; /* peachy page background */
+  --text: #484a47;
+  --text-muted: rgba(72, 74, 71, 0.78);
+  --border: #484a47;
+
+  --accent: #5c6d70; /* slate */
+  --btn-hover-bg: rgba(92, 109, 112, 0.12);
+  --btn-active-bg: rgba(92, 109, 112, 0.22);
+
+  --chip-active-bg: rgba(92, 109, 112, 0.18);
+  --chip-active-border: #5c6d70;
+  --chip-active-fg: #5c6d70;
+
+  --surface-1: rgba(92, 109, 112, 0.1);
+  --surface-2: rgba(92, 109, 112, 0.18);
+  --surface: var(--surface-1);
+
+  --overlay: rgba(0, 0, 0, 0.4);
+  --warn: #e88873;
+
+  /* Focus ring */
+  --focus: rgba(0, 128, 255, 0.25);
+  --focus-border: rgba(0, 128, 255, 0.45);
+}
+
+/* ---------- SEA ---------- */
+html[data-theme="sea"] {
+  /* Header tokens (SOLID) */
+  --header-bg: #476a6f; /* deep teal */
+  --header-fg: #c5c9a4; /* светлый текст/иконки */
+  --header-border: #c5c9a4;
+
+  /* Page tokens */
+  --bg: #c5c9a4; /* olive gray */
+  --text: #476a6f;
+  --text-muted: rgba(71, 106, 111, 0.78);
+  --border: #476a6f;
+
+  --accent: #519e8a; /* teal */
+  --btn-hover-bg: rgba(71, 106, 111, 0.1);
+  --btn-active-bg: rgba(71, 106, 111, 0.16);
+
+  --chip-active-bg: rgba(71, 106, 111, 0.18);
+  --chip-active-border: #519e8a;
+  --chip-active-fg: #476a6f;
+
+  --surface-1: rgba(71, 106, 111, 0.08);
+  --surface-2: rgba(71, 106, 111, 0.16);
+  --surface: var(--surface-1);
+
+  --overlay: rgba(0, 0, 0, 0.4);
+  --warn: #ecbeb4;
+
+  --focus: rgba(0, 128, 255, 0.25);
+  --focus-border: rgba(0, 128, 255, 0.45);
+}
+
+/* ---------- DARK ---------- */
+html[data-theme="dark"] {
+  /* Header tokens (SOLID) */
+  --header-bg: #1f1f1f;
+  --header-fg: #f2f2f2;
+  --header-border: #ffffff22;
+
+  /* Page tokens (inherit from base dark palette, but keep explicit) */
+  --bg: #0b0d12;
+  --text: #e5e7eb;
+  --text-muted: #9ca3af;
+
+  --accent: #60a5fa;
+  --btn-hover-bg: rgba(255, 255, 255, 0.08);
+  --btn-active-bg: rgba(255, 255, 255, 0.14);
+
+  --chip-active-bg: rgba(255, 255, 255, 0.12);
+  --chip-active-border: var(--accent);
+  --chip-active-fg: var(--text);
+
+  --surface-1: #111319;
+  --surface-2: #1a1d24;
+  --surface: var(--surface-1);
+  --border: #2a2f3a;
+
+  --overlay: rgba(0, 0, 0, 0.5);
+  --warn: #e0ac9d;
+
+  --focus: rgba(0, 128, 255, 0.25);
+  --focus-border: rgba(0, 128, 255, 0.45);
+}
+
+/* ---------- SYSTEM (follows OS) ---------- */
+/* When OS is dark — use dark tokens (including header tokens) */
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] {
+    --header-bg: #1f1f1f;
+    --header-fg: #f2f2f2;
+    --header-border: #ffffff22;
+
+    --bg: #0b0d12;
+    --text: #e5e7eb;
+    --text-muted: #9ca3af;
+
+    --accent: #60a5fa;
+    --btn-hover-bg: rgba(255, 255, 255, 0.08);
+    --btn-active-bg: rgba(255, 255, 255, 0.14);
+
+    --chip-active-bg: rgba(255, 255, 255, 0.12);
+    --chip-active-border: var(--accent);
+    --chip-active-fg: var(--text);
+
+    --surface-1: #111319;
+    --surface-2: #1a1d24;
+    --surface: var(--surface-1);
+    --border: #2a2f3a;
+
+    --overlay: rgba(0, 0, 0, 0.5);
+    --warn: #e0ac9d;
+
+    --focus: rgba(0, 128, 255, 0.25);
+    --focus-border: rgba(0, 128, 255, 0.45);
+  }
+}
+/* When OS is light — system keeps base (light) tokens from base.css,
+   but header tokens can still be set there if needed. */
+
+/* =========================================================
+   THEME COMPONENT ACCENTS (minimal, token-based)
+   ========================================================= */
+
+/* Header & Statusbar use header tokens uniformly across themes */
+.app-header,
+#app-status {
+  background: var(--header-bg);
+  color: var(--header-fg);
+  border-color: var(--header-border);
+}
+
+/* Inside header & statusbar — align inputs and buttons to header colors */
+.app-header,
+#app-status {
+  --input-bg: transparent;
+  --input-text: var(--header-fg);
+  --input-border: var(--header-fg);
+  --input-placeholder: color-mix(in oklab, var(--header-fg), transparent 20%);
+  --input-focus-bg: color-mix(in oklab, var(--header-fg) 15%, transparent);
+  --input-focus-border: var(--header-fg);
+  --btn-hover-bg: color-mix(in oklab, var(--header-fg) 12%, transparent);
+  --btn-active-bg: color-mix(in oklab, var(--header-fg) 18%, transparent);
+}
+
+/* Optional: darker contrast for toast action in dark/system-dark */
+html[data-theme="dark"] .toast-action {
+  background: var(--surface-1);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+html[data-theme="dark"] .toast-action:hover,
+html[data-theme="dark"] .toast-action:focus-visible {
+  background: var(--accent);
+  color: #fff;
+  outline: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] .toast-action {
+    background: var(--surface-1);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  html[data-theme="system"] .toast-action:hover,
+  html[data-theme="system"] .toast-action:focus-visible {
+    background: var(--accent);
+    color: #fff;
+    outline: none;
+  }
+}
+
+/* === Colored themes: dark header + matching tokens ===================== */
+html[data-theme="light"] .app-header,
+html[data-theme="light"] #app-status {
+  background: #484a47; /* тёмный фон шапки/статусбара */
+  color: #e0ac9d; /* светлый текст на тёмном */
+  border-color: #e0ac9d;
+  /* чтобы поповеры/иконки брали те же цвета */
+  --header-bg: #484a47;
+  --header-fg: #e0ac9d;
+  --header-border: #e0ac9d;
+}
+
+html[data-theme="sea"] .app-header,
+html[data-theme="sea"] #app-status {
+  background: #476a6f; /* deep teal */
+  color: #c5c9a4; /* светлый на тёмном */
+  border-color: #c5c9a4;
+  --header-bg: #476a6f;
+  --header-fg: #c5c9a4;
+  --header-border: #c5c9a4;
+}
+
+/* === Statusbar: theme toggle button contrast ========================== */
+/* текст и обводка — как в шапке, hover — лёгкая подсветка */
+html[data-theme="light"] #app-status .status-theme-btn,
+html[data-theme="sea"] #app-status .status-theme-btn {
+  background: transparent;
+  color: var(--header-fg);
+  border-color: var(--header-fg);
+}
+html[data-theme="light"] #app-status .status-theme-btn:hover,
+html[data-theme="sea"] #app-status .status-theme-btn:hover {
+  background: color-mix(in oklab, var(--header-fg) 12%, transparent);
+}

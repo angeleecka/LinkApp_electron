@@ -1,0 +1,294 @@
+/* ui/header.css — CLEANED
+ * --------------------------------------------------
+ * One authoritative stylesheet for the app header.
+ * - Uses #app-header (ID) consistently
+ * - Burger shows only under 900px
+ * - Burger popover is FIXED and always above content
+ * - No duplicate .header-burger-popover rules
+ * - Colors inherit from theme tokens: --header-bg/--header-fg
+ */
+
+/* Root header container */
+#app-header {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header, 100);
+
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--header-border);
+  background: var(--header-bg);
+  color: var(--header-fg);
+
+  /* ВАЖНО: всё внутри шапки пусть считает var(--text) = var(--header-fg) */
+  --text: var(--header-fg);
+  --input-bg: transparent;
+  --input-text: var(--header-fg);
+  --input-border: var(--header-fg);
+  --input-placeholder: color-mix(in oklab, var(--header-fg) 85%, transparent);
+  --input-focus-bg: color-mix(in oklab, var(--header-fg) 12%, transparent);
+  --input-focus-border: var(--header-fg);
+}
+
+/* Логотип-слово берёт цвет из токенов шапки */
+.logo-btn,
+.app-title {
+  color: var(--header-fg);
+}
+
+/* Inner fluid rail */
+#app-header .header-inner {
+  max-width: var(--content-max, 1100px);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap; /* never wrap to 2nd row */
+}
+
+/* Logo button */
+.logo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px 6px;
+  color: var(--text);
+}
+.logo-btn:hover {
+  opacity: 0.8;
+}
+.app-title {
+  font-weight: 600;
+  font-size: 1.1em;
+}
+
+/* Universal small icon button */
+.icon-btn {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  padding: 4px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm, 6px);
+  background: var(--input-bg);
+  color: var(--input-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.icon-btn:hover {
+  background: var(--surface-2);
+  border-color: var(--accent);
+}
+
+/* Input wrappers with internal suffix button */
+.input-wrap {
+  position: relative;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.input-wrap input {
+  width: 100%;
+  min-height: 32px;
+  padding: 8px 28px 8px 12px; /* left 12px padding requested */
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
+  border-radius: var(--radius-sm, 8px);
+  box-sizing: border-box;
+  caret-color: var(--accent);
+}
+.input-wrap input::placeholder {
+  color: var(--input-placeholder);
+  opacity: 1;
+}
+.input-wrap input:focus {
+  outline: none;
+  background: var(--input-focus-bg);
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 30%, transparent);
+}
+.input-wrap .input-suffix {
+  /* inner cross/plus */
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid var(--input-border);
+  background: transparent;
+  color: var(--input-text);
+  cursor: pointer;
+}
+.input-wrap .input-suffix:hover {
+  background: var(--surface-2);
+}
+
+/* Quick Add and Search elastic widths */
+.header-right .quick-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+#quickAddInput {
+  padding-right: 30px;
+}
+.quick-add.input-wrap {
+  flex: 1 1 360px;
+  min-width: 180px;
+}
+
+.header-right .search-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+#searchInput {
+  padding-right: 30px;
+  padding-left: 32px;
+  min-width: 240px;
+}
+
+/* Search lens icon via mask */
+.header-right .search-box::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+  background: var(--text-muted);
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" stroke="black" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke-width="2"/><path d="M20 20 L16.65 16.65" stroke-width="2" stroke-linecap="round"/></svg>')
+    center / contain no-repeat;
+  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" stroke="black" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke-width="2"/><path d="M20 20 L16.65 16.65" stroke-width="2" stroke-linecap="round"/></svg>')
+    center / contain no-repeat;
+}
+.header-right .search-box:focus-within::before {
+  background: var(--accent);
+}
+
+/* Burger button — pinned to the right end of the right cluster */
+.header-right .burger-btn {
+  margin-left: auto;
+  display: none;
+}
+
+/* Show burger only on narrow screens */
+@media (max-width: 900px) {
+  .header-right .input-wrap {
+    display: none;
+  } /* hide Quick Add & Search */
+  .header-right .icon-btn {
+    display: none;
+  } /* hide all icons... */
+  .header-right .burger-btn {
+    display: inline-flex;
+  } /* ...except burger */
+}
+
+/* --------------------------------------------------
+   Burger popover (single source of truth)
+   -------------------------------------------------- */
+.header-burger-popover[hidden] {
+  display: none !important;
+}
+
+.header-burger-popover {
+  position: fixed; /* detached from header stacking */
+  right: 12px; /* JS will set precise right/top */
+  top: calc(var(--header-h, 56px) + 8px);
+  min-width: 260px;
+  max-width: min(92vw, 360px);
+  padding: 8px;
+  border: 1px solid var(--popover-border, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  background: var(--popover-bg, var(--header-bg, var(--surface-1)));
+  color: var(--popover-fg, var(--header-fg, var(--text)));
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08);
+  z-index: var(--z-popover, 1300);
+}
+
+/* Buttons inside popover */
+.header-burger-popover button[data-act] {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.header-burger-popover button[data-act]:hover {
+  background: var(--btn-hover-bg, rgba(0, 0, 0, 0.06));
+}
+.header-burger-popover .mi {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+}
+.header-burger-popover .mi svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+}
+.header-burger-popover hr {
+  border: 0;
+  height: 1px;
+  background: var(--popover-border, rgba(0, 0, 0, 0.12));
+  margin: 6px 0;
+}
+
+/* Theme alignments (popover follows header colors on light/sea) */
+html[data-theme="light"] .header-burger-popover,
+html[data-theme="sea"] .header-burger-popover {
+  background: var(--header-bg, var(--surface-1));
+  color: var(--header-fg, var(--text));
+  border-color: rgba(0, 0, 0, 0.1);
+}
+html[data-theme="dark"] .header-burger-popover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+}
+
+/* Slightly tighter header on smaller screens */
+@media (max-width: 768px) {
+  #app-header {
+    padding: 8px 10px;
+  }
+  .header-right {
+    gap: 4px;
+  }
+}
