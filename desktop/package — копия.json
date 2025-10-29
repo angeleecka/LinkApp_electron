@@ -1,9 +1,9 @@
 {
-  "name": "com.angevicka.linkapp",
+  "name": "linkapp-desktop",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.0",
   "description": "LinkApp - Your personal link organizer",
-  "author": "Angevicka Bond",
+  "author": "Your Name",
   "main": "electron-main.mjs",
   "type": "module",
   "scripts": {
@@ -15,30 +15,26 @@
     "build:dev": "electron-builder --config.productName='LinkApp Dev'"
   },
   "build": {
-    "appId": "com.angevicka.linkapp",
+    "appId": "com.yourname.linkapp",
     "productName": "LinkApp",
     "directories": {
       "output": "dist",
-      "buildResources": "build",
-      "app": ".."
+      "buildResources": "build"
     },
     "files": [
-      "desktop/electron-main.mjs",
-      "desktop/preload.cjs",
-      "index.html",
-      "assets/**/*",
-      "core/**/*",
-      "ui/**/*",
-      "platform/**/*",
-      "main.js",
-      "favicon.png",
-      "!desktop/dist/**/*",
-      "!.git/**/*",
-      "!node_modules/**/*"
+      "electron-main.mjs",
+      "preload.cjs",
+      "../index.html",
+      "../assets/**/*",
+      "../core/**/*",
+      "../ui/**/*",
+      "../platform/**/*",
+      "../main.js",
+      "../favicon.png",
+      "!../desktop/**/*",
+      "!../.git",
+      "!../node_modules"
     ],
-    "extraMetadata": {
-      "main": "desktop/electron-main.mjs"
-    },
     "win": {
       "target": [
         {
@@ -52,14 +48,14 @@
           "target": "portable"
         }
       ],
-      "icon": "assets/icons/logo_512x512.png"
+      "icon": "../assets/icons/logo_512x512.png"
     },
     "mac": {
       "target": [
         "dmg",
         "zip"
       ],
-      "icon": "assets/icons/logo_512x512.png",
+      "icon": "../assets/icons/logo_512x512.png",
       "category": "public.app-category.productivity"
     },
     "linux": {
@@ -68,7 +64,7 @@
         "deb",
         "rpm"
       ],
-      "icon": "assets/icons/logo_512x512.png",
+      "icon": "../assets/icons/logo_512x512.png",
       "category": "Utility"
     },
     "nsis": {

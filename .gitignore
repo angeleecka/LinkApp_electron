@@ -1,23 +1,60 @@
-# Node
+# ── Node
 node_modules/
 desktop/node_modules/
 npm-debug.log*
 yarn-debug.log*
+yarn-error.log*
 pnpm-debug.log*
 
-# Сборки/кэш
+# ── Логи
+*.log
+logs/
+*.pid
+*.pid.lock
+
+# ── Кэши/сборки
 dist/
 build/
+out/
 .cache/
 .tmp/
 
-# ОС-мусор
+# ── Electron builder output (инсталляторы и портейбл)
+desktop/dist/
+desktop/release/
+desktop/build/
+desktop/out/
+
+# Артефакты сборки по расширениям (оставим в пределах desktop/*)
+desktop/**/*.exe
+desktop/**/*.dmg
+desktop/**/*.AppImage
+desktop/**/*.snap
+desktop/**/*.deb
+desktop/**/*.rpm
+desktop/**/*.msi
+desktop/**/*.zip
+desktop/**/*.7z
+
+# ── ОС-мусор
 .DS_Store
 Thumbs.db
 
-# Экспортированные данные приложения (если сохраняешь рядом)
+# ── Локальные env-файлы (пример .env.example можно коммитить)
+.env
+.env.local
+*.env.local
+desktop/.env
+desktop/.env.local
+
+# ── Экспортированные данные приложения (если сохраняешь рядом)
 LinkApp-data.json
 
-# Этим файлом Electron хранит состояние в системной папке, в репо он не появится,
-# но на всякий случай игнорим любые временные файлы:
+# ── Временные файлы
 *.tmp
+
+# ── Иде/редакторы (по желанию; если настройки проекта нужны — оставь)
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json

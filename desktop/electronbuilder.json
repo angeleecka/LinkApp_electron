@@ -1,0 +1,47 @@
+{
+  "appId": "com.angevicka.linkapp",
+  "productName": "LinkApp",
+  "directories": {
+    "output": "dist",
+    "app": ".."
+  },
+  "files": [
+    "desktop/electron-main.mjs",
+    "desktop/preload.cjs",
+    "index.html",
+    "main.js",
+    "favicon.png",
+    "assets/**/*",
+    "core/**/*",
+    "ui/**/*",
+    "platform/**/*",
+    "!desktop/dist/**/*",
+    "!desktop/node_modules/**/*",
+    "!.git/**/*"
+  ],
+  "extraMetadata": {
+    "main": "desktop/electron-main.mjs"
+  },
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      },
+      {
+        "target": "portable"
+      }
+    ],
+    "icon": "assets/icons/logo_512x512.png"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "LinkApp"
+  },
+  "portable": {
+    "artifactName": "LinkApp-Portable.exe"
+  }
+}

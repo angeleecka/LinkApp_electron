@@ -1,0 +1,8 @@
+{
+  "name": "linkapp",
+  "version": "0.1.1",
+  "description": "LinkApp - Your personal link organizer",
+  "author": "Angevicka Bond",
+  "license": "MIT",
+  "private": true
+}
