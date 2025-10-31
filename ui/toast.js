@@ -158,6 +158,20 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// ensure-toast-root.js (или просто вставь в main.js)
+(() => {
+  let root = document.getElementById("toast-container");
+  if (!root) {
+    root = document.createElement("div");
+    root.id = "toast-container";
+    document.body.appendChild(root);
+  } else if (root.parentElement !== document.body) {
+    document.body.appendChild(root); // вынести из чужого контейнера/панели
+  }
+  // safety: фиксированная позиция
+  root.style.position = "fixed";
+})();
+
 // =============================================================================
 // ИНИЦИАЛИЗАЦИЯ МОДУЛЯ
 // =============================================================================

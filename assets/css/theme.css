@@ -34,6 +34,15 @@ html[data-theme="light"] {
   /* Focus ring */
   --focus: rgba(0, 128, 255, 0.25);
   --focus-border: rgba(0, 128, 255, 0.45);
+
+  --popover-bg: var(--header-bg);
+  --popover-fg: var(--header-fg);
+  --menu-hover-bg: rgba(224, 172, 157, 0.14); /* из header-fg (#e0ac9d) */
+
+  --pagination-bg: var(--bg); /* твёрдый фон */
+  --pagination-divider: var(--border);
+
+  --toast-bg: #ffffff; /* ← непрозрачный фон тостов */
 }
 
 /* ---------- SEA ---------- */
@@ -66,6 +75,15 @@ html[data-theme="sea"] {
 
   --focus: rgba(0, 128, 255, 0.25);
   --focus-border: rgba(0, 128, 255, 0.45);
+
+  --popover-bg: var(--header-bg);
+  --popover-fg: var(--header-fg);
+  --menu-hover-bg: rgba(197, 201, 164, 0.14); /* из header-fg (#c5c9a4) */
+
+  --pagination-bg: var(--bg);
+  --pagination-divider: var(--border);
+
+  --toast-bg: #ffffff; /* можно слегка тонировать, но не rgba */
 }
 
 /* ---------- DARK ---------- */
@@ -98,6 +116,15 @@ html[data-theme="dark"] {
 
   --focus: rgba(0, 128, 255, 0.25);
   --focus-border: rgba(0, 128, 255, 0.45);
+
+  --popover-bg: var(--header-bg);
+  --popover-fg: var(--header-fg);
+  --menu-hover-bg: rgba(255, 255, 255, 0.1);
+
+  --pagination-bg: #111319; /* можно и var(--surface-1), он твёрдый */
+  --pagination-divider: var(--border);
+
+  --toast-bg: #1a1d24; /* плотный тёмный фон */
 }
 
 /* ---------- SYSTEM (follows OS) ---------- */
@@ -130,6 +157,13 @@ html[data-theme="dark"] {
 
     --focus: rgba(0, 128, 255, 0.25);
     --focus-border: rgba(0, 128, 255, 0.45);
+    --popover-bg: var(--header-bg);
+    --popover-fg: var(--header-fg);
+    --menu-hover-bg: rgba(255, 255, 255, 0.1);
+    --pagination-bg: #111319;
+    --pagination-divider: var(--border);
+
+    --toast-bg: #1a1d24;
   }
 }
 /* When OS is light — system keeps base (light) tokens from base.css,

@@ -20,6 +20,22 @@ const THEME_LABELS = {
   system: "System",
 };
 
+const VIEW_KEY = "linkapp-view-mode";
+function getViewMode() {
+  return localStorage.getItem(VIEW_KEY) === "rows" ? "rows" : "tiles";
+}
+function applyViewMode(mode = "tiles") {
+  const m = mode === "rows" ? "rows" : "tiles";
+  document.documentElement.dataset.view = m;
+  localStorage.setItem(VIEW_KEY, m);
+
+  // Подпись и иконка на кнопке в статус-баре (если уже отрендерена)
+  const btn = document.querySelector("#app-status .status-view-btn");
+  if (btn) {
+    btn.querySelector(".label").textContent = m === "rows" ? "List" : "Tiles";
+  }
+}
+
 function escapeHtml(s = "") {
   return s.replace(
     /[&<>"']/g,
@@ -104,7 +120,50 @@ export function renderStatusBar() {
     <button class="status-theme-btn" type="button" aria-label="Toggle theme (Alt+T)" title="Toggle theme (Alt+T)">
       ${escapeHtml(themeLabel)}
     </button>
+    <div class="status-flex" title="Counts on current page">
+    <span>Page ${pagesTotal ? curIdx + 1 : 0}/${pagesTotal}</span>
+    <span class="divider">•</span>
+    <span>Sections: ${sectionsCount}</span>
+    <span class="divider">•</span>
+    <span>Links: ${linksCount}</span>
+    ${
+      currentQuery
+        ? `<span class="divider">•</span><span>Search: “${escapeHtml(
+            currentQuery
+          )}”</span>`
+        : ""
+    }
+  </div>
+
+  <span class="saved" title="Last local save time">Saved ${savedText}</span>
+
+  <!-- NEW: переключатель вида -->
+  <button class="status-view-btn" type="button" aria-label="Toggle view (Tiles/List)" title="Toggle view (Tiles/List)">
+    <span class="label">Tiles</span>
+    <span class="mi" aria-hidden="true" style="display:inline-flex;gap:6px;margin-left:6px;">
+      <!-- Иконки не переключаем JS-ом, просто текст меняем; так проще -->
+      <svg class="ico-grid" viewBox="0 0 24 24" width="16" height="16">
+        <path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z" fill="none" stroke="currentColor" stroke-width="2"/>
+      </svg>
+      <svg class="ico-list" viewBox="0 0 24 24" width="16" height="16">
+        <path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </span>
+  </button>
+
+  <button class="status-theme-btn" type="button" aria-label="Toggle theme (Alt+T)" title="Toggle theme (Alt+T)">
+    ${currentThemeLabel()}
+  </button>
   `;
+
+  // Применим сохранённый режим и подпись
+  applyViewMode(getViewMode());
+
+  // Кнопка переключения вида
+  el.querySelector(".status-view-btn")?.addEventListener("click", () => {
+    const next = getViewMode() === "tiles" ? "rows" : "tiles";
+    applyViewMode(next);
+  });
 
   // Переключение темы кликом по кнопке
   el.querySelector(".status-theme-btn")?.addEventListener("click", () => {

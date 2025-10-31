@@ -19,7 +19,13 @@
     "productName": "LinkApp",
     "directories": {
       "output": "dist",
-      "buildResources": "build",
+      "buildResources": "assets",
+      "win": {
+        "icon": "assets/icon.ico"
+      },
+      "linux": {
+        "icon": "assets/icon.png"
+      },
       "app": ".."
     },
     "files": [

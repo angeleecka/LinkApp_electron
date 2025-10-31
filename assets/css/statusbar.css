@@ -140,6 +140,48 @@
   flex: 0 0 auto;
 }
 
+/* Кнопка переключения вида в статус-баре */
+#app-status .status-view-btn {
+  display: none; /* по умолчанию скрыта на десктопе */
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--header-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--header-fg);
+  cursor: pointer;
+}
+#app-status .status-view-btn:hover {
+  background: color-mix(in oklab, var(--header-fg) 12%, transparent);
+}
+#app-status .status-view-btn .mi svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Только мобильная ширина */
+@media (max-width: 900px) {
+  #app-status .status-view-btn {
+    display: inline-flex;
+  }
+}
+
+/* Примерные правила для "списка" на мобильном: подстрою под твой DOM на шаге 2 */
+@media (max-width: 900px) {
+  html[data-view="rows"] .links-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  html[data-view="rows"] .link-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+  }
+}
+
 /* Чуть компактнее на телефонах */
 @media (max-width: 640px) {
   #app-status {

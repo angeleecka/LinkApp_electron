@@ -62,8 +62,8 @@ body {
 
   --z-header: 100;
   --z-popover: 3000;
-  --z-modal: 1000;
-  --z-toast: 2000;
+  --z-modal: 5000;
+  --z-toast: 6000;
 }
 
 /* ====== СЕМАНТИЧЕСКИЕ ТОКЕНЫ (по умолчанию — светлая) ======
@@ -83,9 +83,18 @@ body {
   --hl-bg: transparent;
   --hl-text: inherit;
   --z-header: 100;
-  --z-popover: 400;
-  --z-modal: 1000;
-  --z-toast: 2000;
+  --z-popover: 1300;
+  --z-toast: 3000; /* ↑ было 2000 */
+  --z-modal: 5000; /* модалки выше всех */
+
+  /* чтобы поповер не зависел от того, внутри ли он шапки */
+  --popover-bg: var(--header-bg);
+  --popover-fg: var(--header-fg);
+
+  /* отдельный токен ховера для пунктов меню */
+  --menu-hover-bg: var(--btn-hover-bg);
+
+  --toast-bg: var(--surface-1, #fff);
 }
 
 /* Общие базовые применения */

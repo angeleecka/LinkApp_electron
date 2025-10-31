@@ -154,8 +154,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   border: none;
   background: transparent;
   color: var(--input-text);
@@ -209,7 +209,7 @@
   width: 16px;
   height: 16px;
   pointer-events: none;
-  background: var(--text-muted);
+  background: color-mix(in oklab, var(--header-fg) 85%, transparent);
   -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" stroke="black" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke-width="2"/><path d="M20 20 L16.65 16.65" stroke-width="2" stroke-linecap="round"/></svg>')
     center / contain no-repeat;
   mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" stroke="black" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke-width="2"/><path d="M20 20 L16.65 16.65" stroke-width="2" stroke-linecap="round"/></svg>')
@@ -247,8 +247,9 @@
   padding: 8px;
   border: 1px solid var(--popover-border, rgba(0, 0, 0, 0.12));
   border-radius: 12px;
-  background: var(--popover-bg, var(--header-bg, var(--surface-1)));
-  color: var(--popover-fg, var(--header-fg, var(--text)));
+  /* пусть берёт явные токены темы, а не фолбэки */
+  background: var(--popover-bg);
+  color: var(--popover-fg);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08);
   z-index: var(--z-popover, 1300);
 }
@@ -265,9 +266,12 @@
   font: inherit;
   border-radius: 8px;
   cursor: pointer;
+  transition: background var(--dur-1, 120ms) ease;
 }
 .header-burger-popover button[data-act]:hover {
-  background: var(--btn-hover-bg, rgba(0, 0, 0, 0.06));
+  background: var(
+    --menu-hover-bg
+  ) !important; /* временно !important, чтобы перебить любые старые правила */
 }
 .header-burger-popover .mi {
   margin-left: auto;
@@ -372,6 +376,41 @@ html[data-theme="dark"] .header-burger-popover {
 .modal .modal-actions .btn.save:hover,
 .modal .actions .btn.save:hover {
   filter: brightness(0.96);
+}
+
+/* Сделаем hover-тон зависимым от текущего текста поповера */
+.header-burger-popover {
+  /* универсальный тон ховера для кнопок меню */
+  --btn-hover-bg: color-mix(in oklab, currentColor 16%, transparent);
+}
+
+/* Точечные подстройки по темам (если нужно чуть контрастнее) */
+html[data-theme="dark"] .header-burger-popover {
+  --btn-hover-bg: color-mix(in oklab, #fff 14%, transparent);
+}
+html[data-theme="light"] .header-burger-popover,
+html[data-theme="sea"] .header-burger-popover {
+  --btn-hover-bg: color-mix(in oklab, #000 10%, transparent);
+}
+
+/* Плавность и доступность */
+.header-burger-popover button[data-act] {
+  transition: background 0.12s ease;
+}
+.header-burger-popover button[data-act]:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--popover-fg) 40%, transparent);
+  outline-offset: 2px;
+}
+
+/* Fallback на случай отсутствия color-mix (редко) */
+@supports not (background: color-mix(in oklab, black 10%, white)) {
+  html[data-theme="dark"] .header-burger-popover button[data-act]:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  html[data-theme="light"] .header-burger-popover button[data-act]:hover,
+  html[data-theme="sea"] .header-burger-popover button[data-act]:hover {
+    background: rgba(0, 0, 0, 0.08);
+  }
 }
 
 /* ===== Sessions (Workspaces / Snapshots) modal ===== */
