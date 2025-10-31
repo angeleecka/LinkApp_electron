@@ -73,8 +73,9 @@ export function renderStatusBar() {
 
   const { pagesTotal, curIdx, sectionsCount, linksCount } = getStats();
   const savedText = formatAgo(lastSavedAt);
+  const activeName = (storage.saves?.getActiveName?.() || "").trim();
+  const themeLabel = (typeof getTheme === "function" && getTheme()) || "system";
 
-  // ВАЖНО: без внутренних контейнеров — дети напрямую внутри #app-status
   el.innerHTML = `
     <div class="status-flex" title="Counts on current page">
       <span>Page ${pagesTotal ? curIdx + 1 : 0}/${pagesTotal}</span>
@@ -82,6 +83,13 @@ export function renderStatusBar() {
       <span>Sections: ${sectionsCount}</span>
       <span class="divider">•</span>
       <span>Links: ${linksCount}</span>
+      ${
+        activeName
+          ? `<span class="divider">•</span><span class="active-name" title="Active workspace"> ${escapeHtml(
+              activeName
+            )}</span>`
+          : ""
+      }
       ${
         currentQuery
           ? `<span class="divider">•</span><span>Search: “${escapeHtml(
@@ -94,18 +102,17 @@ export function renderStatusBar() {
     <span class="saved" title="Last local save time">Saved ${savedText}</span>
 
     <button class="status-theme-btn" type="button" aria-label="Toggle theme (Alt+T)" title="Toggle theme (Alt+T)">
-      ${currentThemeLabel()}
+      ${escapeHtml(themeLabel)}
     </button>
   `;
 
   // Переключение темы кликом по кнопке
   el.querySelector(".status-theme-btn")?.addEventListener("click", () => {
     const order = ["system", "light", "sea", "dark"];
-    const cur = getTheme() || "system";
+    const cur = (typeof getTheme === "function" && getTheme()) || "system";
     const next = order[(order.indexOf(cur) + 1) % order.length];
-    applyTheme(next);
-    // на случай, если theme.js не эмитит событие
-    eventBus.emit("ui:theme:changed", { mode: next });
+    if (typeof applyTheme === "function") applyTheme(next);
+    eventBus.emit("ui:theme:changed", { mode: next }); // страховка
   });
 }
 

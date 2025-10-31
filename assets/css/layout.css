@@ -18,7 +18,7 @@ body {
 
 /* Внутренние поля у краёв окна */
 #linkapp-root {
-  padding-inline: var(--page-gutter, 16px);
+  /*padding-inline: var(--page-gutter, 16px);*/
   display: flex;
   flex-direction: column;
   min-height: 100vh;

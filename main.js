@@ -43,7 +43,8 @@ import { initEditSectionModal } from "./ui/modals/modal-edit-section.js";
 import { initHistoryModal } from "./ui/modals/modal-history.js";
 import { initConfirmModal } from "./ui/modals/modal-confirm.js";
 import { initSettingsModal } from "./ui/modals/modal-settings.js";
-import { initSessionsModal } from "./ui/modal-sessions.js";
+//import { initSessionsModal } from "./ui/modal-sessions.js";
+import { initSessionsModal } from "./ui/sessions-modal.js";
 
 // Платформенный адаптер (для открытия ссылок)
 import { launcher } from "./platform/launcher-web.js";

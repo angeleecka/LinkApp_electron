@@ -44,6 +44,14 @@ export function initHeader() {
           <button type="button" class="input-suffix qa-go" title="Add" aria-label="Add">+</button>
         </div>
 
+<!-- [A] Иконка поиска (рядом с quick-add на мобилке) -->
+<button class="icon-btn search-trigger" title="Search" aria-label="Search">
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path d="M20 20 L16.65 16.65" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+</button>
+
         <!-- Search -->
         <div class="search-box input-wrap">
           <input id="searchInput" type="text" placeholder="Search title or URL" />
@@ -59,31 +67,41 @@ export function initHeader() {
           </svg>
         </button>
 
-        <button class="icon-btn workspaces-btn" title="Workspaces" aria-label="Workspaces">
+        <button class="icon-btn workspaces-btn" title="Open" aria-label="Open">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path d="M8 7a3 3 0 0 1 6 0m4 3a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3" fill="none" stroke="currentColor" stroke-width="2"/>
-            <path d="M6 10a4 4 0 1 0 0 8h3v-2M18 10a4 4 0 1 1 0 8h-3v-2" fill="none" stroke="currentColor" stroke-width="2"/>
-          </svg>
+    <!-- open-folder -->
+    <path d="M3 7h6l2 2h10v10H3z" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path d="M3 19l3-7h16" fill="none" stroke="currentColor" stroke-width="2" />
+  </svg>
         </button>
 
-        <button class="icon-btn" data-action="data-folder" title="Data Folder" aria-label="Data Folder">
+       <!-- <button class="icon-btn" data-action="data-folder" title="Data Folder" aria-label="Data Folder">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
             <path d="M3 7h6l2 2h10v10H3z" fill="none" stroke="currentColor" stroke-width="2"/>
           </svg>
-        </button>
+        </button> -->
 
-        <button class="icon-btn" data-action="open" title="Open…" aria-label="Open">
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path d="M3 7h6l2 2h10v10H3z" fill="none" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </button>
+        <button class="icon-btn" data-action="open" title="Import..." aria-label="Import">
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 21h14"/>          <!-- полка (всегда снизу) -->
+    <path d="M12 3v14"/>          <!-- стержень -->
+    <path d="M8 15l4 4 4-4"/>     <!-- стрелка вниз (tip = y19, чуть выше полки) -->
+    </g>
+  </svg>
+</button>
 
-        <button class="icon-btn" data-action="export" title="Export JSON" aria-label="Export">
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path d="M12 3v12m0 0l-4-4m4 4l4-4" fill="none" stroke="currentColor" stroke-width="2"/>
-            <path d="M5 21h14" fill="none" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </button>
+
+        <button class="icon-btn" data-action="export" title="Export..." aria-label="Export">
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 21h14"/>          <!-- полка (та же, снизу) -->
+    <path d="M12 19V5"/>          <!-- стержень (старт чуть выше полки) -->
+    <path d="M8 9l4-4 4 4"/>      <!-- стрелка вверх (tip = y5) -->
+    </g>
+  </svg>
+</button>
+
 
         <button class="icon-btn" data-action="history" title="Trash / History" aria-label="Trash">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -92,10 +110,15 @@ export function initHeader() {
         </button>
 
         <button class="icon-btn" data-action="settings" title="Settings" aria-label="Settings">
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm8 4l2 1-2 1-.5 2.2-2.2.5L15 19l-1 2-1-2-3.3-.3-2.2-.5L6 16l-2-1 2-1 .5-2.2 2.2-.5L9 5l1-2 1 2 3.3.3 2.2.5L18 8z" fill="none" stroke="currentColor" stroke-width="1.5"/>
-          </svg>
-        </button>
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2v3M12 19v3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M2 12h3M19 12h3M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/>
+      <circle cx="12" cy="12" r="8"/>
+    </g>
+  </svg>
+</button>
+
 
         <!-- Бургер (узкие экраны) -->
         <button class="icon-btn burger-btn" aria-label="Menu" title="Menu">
@@ -107,12 +130,34 @@ export function initHeader() {
 
       <!-- Popover бургер-меню -->
       <div class="header-burger-popover" hidden>
-        <button type="button" data-act="saveAs">
-          <span class="label">Save As…</span>
-          <span class="mi" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 3v6h8V3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-          </span>
-        </button>
+
+      <!-- Save -->
+<button type="button" data-act="save">
+  <span class="label">Save</span>
+  <span class="mi" aria-hidden="true">
+    <svg viewBox="0 0 24 24">
+      <path d="M5 3h10l4 4v14H5z" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M7 3v6h8V3" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M7 21v-7h10v7" fill="none" stroke="currentColor" stroke-width="2"/>
+    </svg>
+  </span>
+</button>
+        <!-- Save As… (добавляем плюсик к дискете) -->
+<button type="button" data-act="saveAs">
+  <span class="label">Save As…</span>
+  <span class="mi" aria-hidden="true">
+    <svg viewBox="0 0 24 24">
+      <path d="M5 3h10l4 4v14H5z" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M7 3v6h8V3" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M7 21v-7h6v7" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M16 14v4m-2-2h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </span>
+</button>
+        <!-- [B] Popover поиска (вне потока, как и бургер) -->
+        <div class="header-search-popover" hidden>
+            <input id="searchInputMobile" type="text" placeholder="Search title or URL" />
+        </div>
 
         <button type="button" data-act="snapshot">
           <span class="label">Snapshot</span>
@@ -122,7 +167,7 @@ export function initHeader() {
         </button>
 
         <button type="button" data-act="workspaces">
-          <span class="label">Workspaces</span>
+          <span class="label">Open</span>
           <span class="mi" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M8 7a3 3 0 0 1 6 0m4 3a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6 10a4 4 0 1 0 0 8h3v-2M18 10a4 4 0 1 1 0 8h-3v-2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
           </span>
@@ -131,18 +176,32 @@ export function initHeader() {
         <hr/>
 
         <button type="button" data-act="open">
-          <span class="label">Open…</span>
-          <span class="mi" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-          </span>
-        </button>
+  <span class="label">Import…</span>
+  <span class="mi" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 21h14"/>          <!-- полка (всегда снизу) -->
+    <path d="M12 3v14"/>          <!-- стержень -->
+    <path d="M8 15l4 4 4-4"/>     <!-- стрелка вниз (tip = y19, чуть выше полки) -->
+      </g>
+    </svg>
+  </span>
+</button>
+
 
         <button type="button" data-act="export">
-          <span class="label">Export JSON</span>
-          <span class="mi" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 21h14" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-          </span>
-        </button>
+  <span class="label">Export JSON</span>
+  <span class="mi" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 21h14"/>          <!-- полка (та же, снизу) -->
+    <path d="M12 19V5"/>          <!-- стержень (старт чуть выше полки) -->
+    <path d="M8 9l4-4 4 4"/>      <!-- стрелка вверх (tip = y5) -->
+      </g>
+    </svg>
+  </span>
+</button>
+
 
         <button type="button" data-act="history">
           <span class="label">Trash / History</span>
@@ -151,13 +210,20 @@ export function initHeader() {
           </span>
         </button>
 
-        <button type="button" data-act="settings">
-          <span class="label">Settings</span>
-          <span class="mi" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm8 4l2 1-2 1-.5 2.2-2.2.5L15 19l-1 2-1-2-3.3-.3-2.2-.5L6 16l-2-1 2-1 .5-2.2 2.2-.5L9 5l1-2 1 2 3.3.3 2.2.5L18 8z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-          </span>
-        </button>
+       <button type="button" data-act="settings">
+  <span class="label">Settings</span>
+  <span class="mi" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 2v3M12 19v3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M2 12h3M19 12h3M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/>
+        <circle cx="12" cy="12" r="8"/>
+      </g>
+    </svg>
+  </span>
+</button>
 
+<!--
         <hr/>
 
         <button type="button" data-act="openData">
@@ -168,13 +234,13 @@ export function initHeader() {
         </button>
 
         <button type="button" data-act="revealState">
-          <span class="label">Reveal state.json</span>
+          <span class="label">Show data file</span>
           <span class="mi" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
           </span>
         </button>
       </div>
-    </div>
+    </div> -->
   `;
 
   // ============================================================================
@@ -190,12 +256,12 @@ export function initHeader() {
 
   function openSaveAsModal(defaultName = "") {
     const body = `
-      <div class="form-row" style="display:grid;gap:8px;">
+      <div class="modal-form">
         <label for="saveAsName">Name</label>
-        <input id="saveAsName" type="text" placeholder="e.g. My links"
-               value="${esc(defaultName)}"
-               style="padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface-1);color:var(--text);"/>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
+        <input id="saveAsName" type="text" placeholder="e.g. My links" value="${esc(
+          defaultName
+        )}"/>
+        <div class="actions">
           <button class="btn" data-act="cancel">Cancel</button>
           <button class="btn save" data-act="ok">Save</button>
         </div>
@@ -229,11 +295,10 @@ export function initHeader() {
 
   function openSnapshotModal() {
     const body = `
-      <div class="form-row" style="display:grid;gap:8px;">
+      <div class="modal-form">
         <label for="snapshotName">Snapshot name</label>
-        <input id="snapshotName" type="text" placeholder="e.g. Backup – ${new Date().toLocaleString()}"
-               style="padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface-1);color:var(--text);"/>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
+        <input id="snapshotName" type="text" placeholder="e.g. Backup – ${new Date().toLocaleString()}"/>
+        <div class="actions">
           <button class="btn" data-act="cancel">Cancel</button>
           <button class="btn save" data-act="ok">Create</button>
         </div>
@@ -303,6 +368,62 @@ export function initHeader() {
   const qaBtn = el.querySelector(".qa-go");
   const searchInput = el.querySelector("#searchInput");
   const searchClear = el.querySelector(".search-clear");
+
+  /* === SEARCH POPOVER (мобильный) === */
+  const searchTrigger = el.querySelector(".search-trigger");
+  const searchPop = el.querySelector(".header-search-popover");
+  const searchInputMobile = el.querySelector("#searchInputMobile");
+
+  function emitSearchValue(val) {
+    eventBus.emit("search:query", { q: (val || "").trim() });
+  }
+
+  searchTrigger?.addEventListener("click", () => {
+    if (searchPop && searchPop.parentElement !== document.body) {
+      document.body.appendChild(searchPop);
+    }
+    const headerRect = el.getBoundingClientRect();
+    // ширина: не шире 420, но с отступами по 12px слева/справа
+    const w = Math.min(420, window.innerWidth - 24);
+    searchPop.style.width = w + "px";
+    searchPop.style.top = Math.round(headerRect.bottom + 8) + "px";
+    searchPop.style.left = Math.round((window.innerWidth - w) / 2) + "px";
+    searchPop.style.right = "auto";
+    searchPop.hidden = !searchPop.hidden;
+    if (!searchPop.hidden) {
+      searchInputMobile?.focus();
+      searchInputMobile?.select();
+    }
+  });
+
+  searchInputMobile?.addEventListener("input", (e) =>
+    emitSearchValue(e.target.value)
+  );
+  searchInputMobile?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      emitSearchValue(e.target.value);
+      searchPop.hidden = true;
+    }
+    if (e.key === "Escape") {
+      searchPop.hidden = true;
+    }
+  });
+
+  /* клик снаружи — закрыть */
+  document.addEventListener("click", (e) => {
+    if (
+      !searchPop?.hidden &&
+      !searchPop.contains(e.target) &&
+      !searchTrigger.contains(e.target)
+    ) {
+      searchPop.hidden = true;
+    }
+  });
+
+  /* ресайз — тоже скрыть */
+  window.addEventListener("resize", () =>
+    searchPop?.setAttribute("hidden", "")
+  );
 
   // Вынести поповер из хедера в body — так он не попадёт в чужие stacking contexts
   if (burgerPop && burgerPop.parentElement !== document.body) {
@@ -376,6 +497,14 @@ export function initHeader() {
       eventBus.emit("ui:settings:open");
     }
   );
+
+  const searchBtn =
+    el.querySelector(".search-trigger") || el.querySelector(".search-toggle");
+
+  searchBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    // тут вызывай твой показ «стикера»/оверлея поиска
+  });
 
   // ============================================================================
   // QUICK ADD
@@ -456,6 +585,16 @@ export function initHeader() {
     const act = b.dataset.act;
     burgerPop.hidden = true;
 
+    if (act === "save") {
+      if (storage.saves?.saveActive?.()) {
+        storage.saves.saveActive();
+        eventBus.emit("ui:toast", { type: "success", message: "Saved" });
+      } else {
+        openSaveAsModal(storage.saves?.getActiveName?.() || "");
+      }
+      return;
+    }
+
     if (act === "saveAs") {
       openSaveAsModal(storage.saves?.getActiveName?.() || "");
       return;
@@ -490,13 +629,22 @@ export function initHeader() {
       } else {
         eventBus.emit("ui:toast", { type: "info", message: "Desktop only" });
       }
+      return;
     }
+
     if (act === "revealState") {
       if (window.desktop?.platform?.revealStateFile) {
         await window.desktop.platform.revealStateFile();
       } else {
         eventBus.emit("ui:toast", { type: "info", message: "Desktop only" });
       }
+      return;
+    }
+
+    const isDesktop = !!window.desktop?.platform;
+    if (!isDesktop) {
+      burgerPop.querySelector('[data-act="openData"]')?.remove();
+      burgerPop.querySelector('[data-act="revealState"]')?.remove();
     }
   });
 
@@ -518,6 +666,7 @@ export function initHeader() {
         openSaveAsModal("");
       }
     }
+    if (e.key === "Escape") burgerPop?.setAttribute("hidden", "");
   });
 
   // Быстрый фокус: "/" → поиск, Ctrl/Cmd+Shift+N → Quick Add

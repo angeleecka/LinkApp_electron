@@ -1,26 +1,35 @@
-/* ui/header.css — CLEANED
- * --------------------------------------------------
- * One authoritative stylesheet for the app header.
- * - Uses #app-header (ID) consistently
- * - Burger shows only under 900px
- * - Burger popover is FIXED and always above content
- * - No duplicate .header-burger-popover rules
- * - Colors inherit from theme tokens: --header-bg/--header-fg
- */
+/* =========================================================
+   ui/header.css — SORTED & ANNOTATED
+   ---------------------------------------------------------
+   Разделы:
+   1) Header base & tokens
+   2) Layout containers
+   3) Logo / Title
+   4) Universal buttons
+   5) Inputs (quick-add, search)
+   6) Search lens & trigger
+   7) Burger button
+   8) Burger popover
+   9) Search popover
+   10) Modal helpers
+   11) Responsive breakpoints
+   ========================================================= */
 
-/* Root header container */
+/* ========== 1) HEADER BASE & TOKENS ========== */
 #app-header {
   display: block;
   position: sticky;
   top: 0;
   z-index: var(--z-header, 100);
-
+  max-width: none;
+  width: 100%;
+  margin: 0;
   padding: 6px 10px;
   border-bottom: 1px solid var(--header-border);
   background: var(--header-bg);
   color: var(--header-fg);
 
-  /* ВАЖНО: всё внутри шапки пусть считает var(--text) = var(--header-fg) */
+  /* внутри шапки считаем var(--text) = var(--header-fg) */
   --text: var(--header-fg);
   --input-bg: transparent;
   --input-text: var(--header-fg);
@@ -30,15 +39,8 @@
   --input-focus-border: var(--header-fg);
 }
 
-/* Логотип-слово берёт цвет из токенов шапки */
-.logo-btn,
-.app-title {
-  color: var(--header-fg);
-}
-
-/* Inner fluid rail */
+/* ========== 2) LAYOUT CONTAINERS ========== */
 #app-header .header-inner {
-  max-width: var(--content-max, 1100px);
   margin-inline: auto;
   display: flex;
   align-items: center;
@@ -59,10 +61,26 @@
   gap: 8px;
   flex: 1 1 auto;
   min-width: 0;
-  flex-wrap: nowrap; /* never wrap to 2nd row */
+  flex-wrap: nowrap; /* never wrap */
+  overflow: visible; /* + */
 }
 
-/* Logo button */
+/* Кнопки поверх инпутов */
+.header-right .icon-btn {
+  position: relative; /* + */
+  z-index: 20; /* + */
+}
+.header-right .input-wrap {
+  position: relative; /* + */
+  z-index: 10; /* + ниже кнопок */
+}
+
+/* ========== 3) LOGO / TITLE ========== */
+.logo-btn,
+.app-title {
+  color: var(--header-fg);
+}
+
 .logo-btn {
   display: inline-flex;
   align-items: center;
@@ -71,50 +89,17 @@
   background: transparent;
   cursor: pointer;
   padding: 4px 6px;
-  color: var(--text);
 }
 .logo-btn:hover {
   opacity: 0.8;
 }
+
 .app-title {
   font-weight: 600;
   font-size: 1.1em;
 }
 
-/* После строки 82 */
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1 1 auto;
-  min-width: 0;
-  flex-wrap: nowrap;
-  overflow: visible; /* ← добавьте */
-}
-
-/* Ограничьте max-width для input-wrap */
-.header-right .quick-add {
-  flex: 1 1 360px;
-  max-width: 360px; /* ← добавьте */
-  min-width: 180px;
-}
-
-.header-right .search-box {
-  flex: 0 1 auto;
-  max-width: 280px; /* ← добавьте */
-  min-width: 200px;
-}
-
-/* Заставьте кнопки быть поверх */
-.header-right .icon-btn {
-  position: relative; /* ← добавьте */
-  z-index: 20; /* ← добавьте */
-}
-.header-right .input-wrap {
-  position: relative;
-  z-index: 10; /* ниже кнопок */
-}
-/* Universal small icon button */
+/* ========== 4) UNIVERSAL SMALL ICON BUTTON ========== */
 .icon-btn {
   flex: 0 0 auto;
   width: 30px;
@@ -134,7 +119,7 @@
   border-color: var(--accent);
 }
 
-/* Input wrappers with internal suffix button */
+/* ========== 5) INPUTS (QUICK-ADD, SEARCH) ========== */
 .input-wrap {
   position: relative;
   flex: 0 1 auto;
@@ -143,7 +128,7 @@
 .input-wrap input {
   width: 100%;
   min-height: 32px;
-  padding: 8px 28px 8px 12px; /* left 12px padding requested */
+  padding: 8px 28px 8px 12px;
   border: 1px solid var(--input-border);
   background: var(--input-bg);
   color: var(--input-text);
@@ -162,7 +147,6 @@
   box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 30%, transparent);
 }
 .input-wrap .input-suffix {
-  /* inner cross/plus */
   position: absolute;
   right: 6px;
   top: 50%;
@@ -172,26 +156,29 @@
   justify-content: center;
   width: 22px;
   height: 22px;
-  border-radius: 6px;
-  border: 1px solid var(--input-border);
+  border: none;
   background: transparent;
   color: var(--input-text);
   cursor: pointer;
 }
 .input-wrap .input-suffix:hover {
   background: var(--surface-2);
+  border-radius: 50%;
 }
 
-/* Quick Add and Search elastic widths */
+/* Ширины и эластика */
 .header-right .quick-add {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  max-width: 360px;
+  display: inline-flex; /* DUPLICATE? ниже есть ещё один display */
+  align-items: center; /* DUPLICATE? */
+  gap: 8px; /* DUPLICATE? */
 }
 #quickAddInput {
   padding-right: 30px;
 }
+/* DUPLICATE? quick-add ниже повторяет часть правил */
 .quick-add.input-wrap {
+  /* DUPLICATE? координировать с .header-right .quick-add */
   flex: 1 1 360px;
   min-width: 180px;
 }
@@ -201,6 +188,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex: 0 1 auto;
+  max-width: 280px; /* + */
+  min-width: 200px;
 }
 #searchInput {
   padding-right: 30px;
@@ -208,7 +198,8 @@
   min-width: 240px;
 }
 
-/* Search lens icon via mask */
+/* ========== 6) SEARCH LENS & TRIGGER ========== */
+/* Лупа в поле поиска */
 .header-right .search-box::before {
   content: "";
   position: absolute;
@@ -228,35 +219,28 @@
   background: var(--accent);
 }
 
-/* Burger button — pinned to the right end of the right cluster */
-.header-right .burger-btn {
-  margin-left: auto;
+/* По умолчанию: видно поле, лупа скрыта */
+.header-right .search-box.input-wrap {
+  display: inline-flex;
+}
+.header-right .search-trigger {
   display: none;
 }
 
-/* Show burger only on narrow screens */
-@media (max-width: 900px) {
-  .header-right .input-wrap {
-    display: none;
-  } /* hide Quick Add & Search */
-  .header-right .icon-btn {
-    display: none;
-  } /* hide all icons... */
-  .header-right .burger-btn {
-    display: inline-flex;
-  } /* ...except burger */
+/* ========== 7) BURGER BUTTON ========== */
+.header-right .burger-btn {
+  margin-left: auto;
+  display: none; /* показываем в media ниже */
 }
 
-/* --------------------------------------------------
-   Burger popover (single source of truth)
-   -------------------------------------------------- */
+/* ========== 8) BURGER POPOVER ========== */
 .header-burger-popover[hidden] {
   display: none !important;
 }
 
 .header-burger-popover {
-  position: fixed; /* detached from header stacking */
-  right: 12px; /* JS will set precise right/top */
+  position: fixed; /* оторван от стека хедера */
+  right: 12px; /* JS переустановит при открытии */
   top: calc(var(--header-h, 56px) + 8px);
   min-width: 260px;
   max-width: min(92vw, 360px);
@@ -268,8 +252,6 @@
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08);
   z-index: var(--z-popover, 1300);
 }
-
-/* Buttons inside popover */
 .header-burger-popover button[data-act] {
   width: 100%;
   display: grid;
@@ -305,7 +287,7 @@
   margin: 6px 0;
 }
 
-/* Theme alignments (popover follows header colors on light/sea) */
+/* Тема-проекции для поповера, наследующие шапку */
 html[data-theme="light"] .header-burger-popover,
 html[data-theme="sea"] .header-burger-popover {
   background: var(--header-bg, var(--surface-1));
@@ -316,12 +298,238 @@ html[data-theme="dark"] .header-burger-popover {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
 }
 
-/* Slightly tighter header on smaller screens */
+/* ========== 9) SEARCH POPOVER ========== */
+.header-search-popover {
+  position: fixed;
+  min-width: min(92vw, 380px);
+  max-width: 420px;
+  background: var(--popover-bg, var(--header-bg, var(--surface-1)));
+  color: var(--popover-fg, var(--header-fg, var(--text)));
+  border: 1px solid var(--popover-border, var(--border));
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  padding: 8px;
+  z-index: var(--z-popover, 1300);
+}
+.header-search-popover[hidden] {
+  display: none !important;
+}
+.header-search-popover input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-1);
+  color: var(--text);
+}
+
+/* ========== 10) MODAL HELPERS (Save As / Snapshot / Workspaces) ========== */
+.modal-form {
+  display: grid;
+  gap: 10px;
+}
+.modal-form input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-1);
+  color: var(--text);
+}
+
+.modal-form .actions,
+.modal .modal-actions,
+.modal .actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* Кнопки модалок */
+.modal-form .btn,
+.modal .modal-actions .btn,
+.modal .actions .btn {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.modal-form .btn:hover,
+.modal .modal-actions .btn:hover,
+.modal .actions .btn:hover {
+  background: var(--btn-hover-bg, rgba(0, 0, 0, 0.06));
+}
+.modal-form .btn.save,
+.modal .modal-actions .btn.save,
+.modal .actions .btn.save {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.modal-form .btn.save:hover,
+.modal .modal-actions .btn.save:hover,
+.modal .actions .btn.save:hover {
+  filter: brightness(0.96);
+}
+
+/* ===== Sessions (Workspaces / Snapshots) modal ===== */
+.sessions-modal {
+  display: grid;
+  gap: 14px;
+  min-width: min(92vw, 560px);
+}
+
+.sessions-modal section {
+  display: grid;
+  gap: 8px;
+}
+
+.sessions-modal h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.sessions-modal .list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px; /* расстояние между карточками */
+}
+
+/* Карточка */
+.sessions-modal .row {
+  position: relative; /* для абсолютного позиционирования actions */
+  display: block;
+  padding: 12px 116px 12px 12px; /* справа оставляем «карман» под кнопки */
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-1);
+  color: var(--text);
+}
+
+/* Содержимое карточки */
+.sessions-modal .info {
+  display: grid;
+  gap: 4px;
+}
+.sessions-modal .name {
+  font-weight: 600;
+  line-height: 1.2;
+}
+.sessions-modal .meta {
+  font-size: 0.85rem;
+  color: var(--text-muted, #8a8a8a);
+}
+
+/* Кнопки в правом нижнем углу карточки */
+.sessions-modal .actions {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  gap: 8px;
+}
+
+/* Единый вид кнопок внутри этой модалки */
+.sessions-modal .btn {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.sessions-modal .btn:hover {
+  background: var(--btn-hover-bg, rgba(0, 0, 0, 0.06));
+}
+.sessions-modal .btn.save {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.sessions-modal .btn.save:hover {
+  filter: brightness(0.96);
+}
+
+/* Разделитель между секциями (если используешь <hr>) */
+.sessions-modal hr {
+  border: 0;
+  height: 1px;
+  background: var(--border);
+  margin: 6px 0;
+}
+
+/* Мобильная адаптация: кнопки вниз, карточки без абсолютного позиционирования */
+@media (max-width: 480px) {
+  .sessions-modal .row {
+    padding-right: 12px; /* убираем «карман» справа */
+  }
+  .sessions-modal .actions {
+    position: static; /* вернём в поток */
+    margin-top: 8px;
+    justify-content: flex-end;
+    width: 100%;
+  }
+}
+
+/* ========== 11) RESPONSIVE BREAKPOINTS ========== */
+
+/* На ≤1060px прячем поле поиска, показываем иконку-лупу */
+@media (max-width: 1060px) {
+  .header-right .search-box.input-wrap {
+    display: none !important;
+  }
+  .header-right .icon-btn.search-trigger {
+    display: inline-flex !important;
+  }
+}
+
+/* Мобилки: прячем всё кроме quick-add, лупы и бургера */
+@media (max-width: 900px) {
+  #app-header .primary-save {
+    display: none !important;
+  }
+
+  .header-right .search-box.input-wrap {
+    display: none !important;
+  }
+  .header-right .quick-add.input-wrap {
+    display: inline-flex !important;
+    flex: 1 1 auto;
+    min-width: 140px;
+  }
+
+  /* скрыть все иконки… */
+  .header-right .icon-btn {
+    display: none !important;
+  }
+  /* …кроме лупы и бургера */
+  .header-right .icon-btn.search-trigger,
+  .header-right .icon-btn.burger-btn {
+    display: inline-flex !important;
+  }
+
+  .header-right {
+    gap: 6px;
+  }
+}
+
+/* Чуть плотнее на узких */
 @media (max-width: 768px) {
   #app-header {
     padding: 8px 10px;
   }
   .header-right {
     gap: 4px;
+  }
+}
+
+/* Ограничим ширину поповера поиска на совсем узких */
+@media (max-width: 480px) {
+  .header-search-popover {
+    max-width: 92vw;
   }
 }
