@@ -1,208 +1,187 @@
 /* =============================================================================
-     СТАТУС-БАР (FOOTER)
-     ============================================================================= */
+   STATUS BAR (FOOTER) — CLEAN
+   ============================================================================= */
+
+/* Структурный класс — можно оставить на всякий случай, НО без цветов,
+   чтобы не спорить с #app-status */
 .app-status {
   position: sticky;
   bottom: 0;
-  background: var(--surface-1);
-  border-top: 1px solid var(--border);
-  z-index: 5;
+  z-index: var(--z-header, 100);
 }
 
-.app-status:hover {
-  color: var(--text);
-  background: var(--surface-2);
-}
-
-/* Статусбар без внешних отступов, фикс высоты — из темы или из контента */
+/* Основной контейнер бара */
 #app-status {
-  margin-top: 0 !important;
+  position: sticky;
+  bottom: 0;
 
-  height: var(--statusbar-h, 28px);
-  line-height: var(--statusbar-h, 28px);
-  padding: 0 12px; /* без вертикальных паддингов, чтобы высота совпадала с токеном */
-  display: flex;
-  align-items: center;
-}
-
-/* Корневой блок статусбара уже есть (#app-status).
-   Добавим аккуратную вёрстку и элементы. */
-#app-status .statusbar {
-  max-width: var(--content-max, 1100px);
-  margin-inline: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 12px;
-}
-
-#app-status .status-item {
-  opacity: 0.95;
-}
-#app-status .status-item strong {
-  font-weight: 600;
-}
-#app-status .status-sep {
-  opacity: 0.5;
-}
-#app-status .status-spacer {
-  flex: 1 1 auto;
-}
-
-/* Кнопка темы: как маленький «чип» */
-#app-status .theme-toggle {
-  border: 1px solid var(--border);
-  background: var(--surface-1);
-  color: var(--text);
-  border-radius: var(--radius-sm);
-  padding: 4px 8px;
-  line-height: 1;
-  cursor: pointer;
-}
-#app-status .theme-toggle:hover {
-  background: var(--surface-2);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-/* Метка поиска — слегка выделим */
-#app-status .status-item.query {
-  font-style: italic;
-  opacity: 1;
-}
-
-/* нижняя «линза» уже есть в твоих темах; при желании можно усилить:
-  #app-status { background: var(--surface-1); border-top: 1px solid var(--border); }
-  */
-
-.status-left,
-.status-right {
   display: flex;
   align-items: center;
   gap: 8px;
-}
+  width: 100%;
+  padding: 4px 10px;
 
-.status-theme-btn {
-  border: 1px solid var(--border);
-  background: var(--surface-1);
-  color: var(--text);
-  border-radius: var(--radius-sm);
-  padding: 4px 8px;
-  cursor: pointer;
-}
-.status-theme-btn:hover {
-  background: var(--surface-2);
-  border-color: var(--accent);
-}
+  /* Бар наследует «шапочные» токены, чтобы визуально быть продолжением header */
+  background: var(--header-bg);
+  color: var(--header-fg);
+  border-top: 1px solid var(--header-border);
 
-.statusbar .divider {
-  opacity: 0.6;
-}
-
-/* ===== STATUSBAR: single-line, no-wrap, mobile-friendly ===== */
-#app-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  /* Ключевые флаги для однострочности */
-  flex-wrap: nowrap;
+  /* Однострочность, без переноса, без общей полосы скролла */
   white-space: nowrap;
+  flex-wrap: nowrap;
+  overflow: hidden;
 
-  /* Если совсем узко — даём горизонтальную прокрутку вместо переноса */
-  overflow-x: auto;
-  overflow-y: hidden;
+  min-height: var(--statusbar-h, 28px);
   -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable both-edges;
-
-  /* Подстрахуем высоту, чтобы тело не «подпрыгивало» */
-  min-height: var(--statusbar-h, 28px);
 }
 
-/* Дефолт: элементы статусбара — фиксированной ширины (не растягиваются) */
+/* Дочерние элементы по умолчанию фиксированной ширины */
 #app-status > * {
   flex: 0 0 auto;
 }
 
-/* Элемент, который может «сжиматься» и обрезаться троеточием.
-   Применится, если в разметке будет класс .status-flex (см. ниже «опционально»). */
+/* ---------------------------------------------------------------------------
+     СЕРЕДИНА БАРА (ПРОКРУТКА ТОЛЬКО ТУТ)
+     --------------------------------------------------------------------------- */
 #app-status .status-flex {
+  position: relative; /* для фейдов-подсказок */
   flex: 1 1 auto;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Кнопку темы прижимаем вправо (если она последняя — просто будет «к правому краю») */
-#app-status .status-theme-btn {
-  margin-left: auto;
-  flex: 0 0 auto;
-}
-
-/* Кнопка переключения вида в статус-баре */
-#app-status .status-view-btn {
-  display: none; /* по умолчанию скрыта на десктопе */
+  display: flex;
   align-items: center;
   gap: 6px;
+  overflow-x: auto; /* скроллим только середину */
+  overflow-y: hidden;
+  white-space: nowrap;
+
+  /* уже есть: flex:1 1 auto; min-width:0; display:flex; white-space:nowrap; overflow-x:auto; */
+  scrollbar-width: none; /* FF спрятать полосу */
+  -webkit-overflow-scrolling: touch; /* инерция на тач */
+  touch-action: pan-x; /* жесты по X */
+  cursor: grab; /* намёк, что можно «тянуть» */
+}
+#app-status .status-flex::-webkit-scrollbar {
+  display: none; /* WebKit/Blink */
+}
+
+/* Вертикальные разделители вместо буллетов */
+#app-status .vsep {
+  display: inline-block;
+  width: 1px;
+  height: 14px;
+  background: var(--header-border);
+  margin: 0 4px;
+  flex: 0 0 1px;
+}
+
+#app-status .ws-name {
+  font-weight: 600;
+}
+
+#app-status .save-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0; /* текста нет — зазор не нужен */
+}
+#app-status .save-indicator .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--header-fg) 25%, transparent);
+}
+#app-status .save-indicator[data-state="saved"] .dot {
+  background: #4caf50;
+}
+#app-status .save-indicator[data-state="dirty"] .dot {
+  background: #f44336;
+}
+
+/* Фейды по краям как намёк «можно скроллить» */
+#app-status .status-flex::before,
+#app-status .status-flex::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 16px;
+  pointer-events: none;
+  transition: opacity var(--dur-1, 120ms) ease;
+}
+#app-status .status-flex::before {
+  left: 0;
+  background: linear-gradient(to right, var(--header-bg), transparent);
+}
+#app-status .status-flex::after {
+  right: 0;
+  background: linear-gradient(to left, var(--header-bg), transparent);
+}
+/* Края достигнуты — гасим соответствующий фейд (JS добавляет классы) */
+#app-status .status-flex.at-start::before {
+  opacity: 0;
+}
+#app-status .status-flex.at-end::after {
+  opacity: 0;
+}
+
+/* ---------------------------------------------------------------------------
+     КНОПКИ
+     --------------------------------------------------------------------------- */
+#app-status .status-theme-btn,
+#app-status .status-view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
   padding: 4px 8px;
-  border: 1px solid var(--header-border);
   border-radius: 8px;
+  border: 1px solid var(--header-border);
   background: transparent;
   color: var(--header-fg);
   cursor: pointer;
 }
+#app-status .status-theme-btn:hover,
 #app-status .status-view-btn:hover {
-  background: color-mix(in oklab, var(--header-fg) 12%, transparent);
+  background: var(
+    --btn-hover-bg,
+    color-mix(in oklab, var(--header-fg) 12%, transparent)
+  );
 }
 #app-status .status-view-btn .mi svg {
   width: 16px;
   height: 16px;
 }
 
-/* Только мобильная ширина */
+/* Кнопку темы прижимаем вправо (если последняя — окажется у правого края) */
+#app-status .status-theme-btn {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+/* Свитчер Tiles/List показываем ТОЛЬКО в «компактном» UI */
+#app-status .status-view-btn {
+  display: none;
+}
+body.study-overlay #app-status .status-view-btn,
+body.compact-900 #app-status .status-view-btn {
+  display: inline-flex;
+}
+
 @media (max-width: 900px) {
   #app-status .status-view-btn {
     display: inline-flex;
   }
 }
 
-/* Примерные правила для "списка" на мобильном: подстрою под твой DOM на шаге 2 */
-@media (max-width: 900px) {
-  html[data-view="rows"] .links-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-  html[data-view="rows"] .link-card {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-  }
-}
-
-/* Чуть компактнее на телефонах */
+/* Чуть компактнее на узких телефонах */
 @media (max-width: 640px) {
   #app-status {
     gap: 6px;
     padding-inline: 8px;
   }
-  #app-status .status-theme-btn {
-    padding: 4px 8px;
-  }
-  /* Если есть второстепенные элементы — можно пометить их классом .hide-on-mobile */
-  #app-status .hide-on-mobile {
-    display: none;
-  }
-}
 
-/* (опционально) чуть приглушим горизонтальную полоску прокрутки */
-#app-status::-webkit-scrollbar {
-  height: 8px;
-}
-#app-status::-webkit-scrollbar-thumb {
-  background: var(--sb-thumb);
-  border-radius: var(--sb-radius);
-  border: 2px solid var(--sb-track);
+  #app-status .status-flex {
+    gap: 3px;
+  }
 }

@@ -2,6 +2,11 @@
    LAYOUT.CSS — КАРКАС ПРИЛОЖЕНИЯ
    ============================================================================= */
 
+/* если хочешь небольшой внутренний отступ для контента — меняй этот токен */
+/*:root { --page-gutter: 0px; }
+#app-body { padding-inline: var(--page-gutter); }
+#pagination { padding-inline: var(--page-gutter); }*/
+
 /* Глобально: предотвращаем горизонтальный скролл окна */
 html,
 body,
@@ -29,9 +34,9 @@ body {
 #app-body,
 #pagination,
 #app-status {
-  max-width: var(--content-max, 1100px);
-  margin-inline: auto;
-  width: 100%;
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
 }
 
 /* Основной скроллируемый контент */
@@ -216,7 +221,7 @@ body {
   .app-header .header-inner {
     max-width: none;
     margin-inline: 0;
-    padding-inline: 8px; /* лёгкий внутренний отступ */
+    padding-inline: 2px; /* лёгкий внутренний отступ */
   }
 
   /* тело пусть остаётся «внутри» — компактные поля по бокам */

@@ -17,6 +17,80 @@ let toastContainer = null;
 const toastQueue = [];
 let isShowingToast = false;
 
+// ===== Toast middleware: suppress + coalesce + queue cap =====
+const TOAST_COALESCE_MS = 800; // окно склейки дублей
+const TOAST_QUEUE_LIMIT = 3; // максимум видимых одновременно
+const IMPORTANT = new Set(["error", "warning"]); // важные не режем
+
+const lastByKey = new Map(); // key -> ts
+let rafToken = 0;
+const pending = [];
+let container = null;
+
+function mkKey(t) {
+  // нормализованный ключ дубликата
+  const msg = (t.message || "").trim().toLowerCase();
+  if (t.group) return `${t.type}:${t.group}`;
+  if (/^saved!?$/.test(msg)) return "success:save"; // все «Saved» — один ключ
+  return `${t.type}:${msg}`;
+}
+function shouldSuppress(t) {
+  // Подавляем «Saved» — теперь это показывает индикатор
+  const msg = (t.message || "").trim();
+  if (t.type === "success" && /^saved!?$/i.test(msg)) return true;
+  return false;
+}
+function ensureContainer() {
+  if (container) return container;
+  container = document.getElementById("toast-container");
+  return container;
+}
+function queueLen() {
+  const c = ensureContainer();
+  return c ? c.children.length : 0;
+}
+
+// Подписка на "сырой" поток
+eventBus.on("ui:toast", (t) => {
+  if (!t) return;
+  if (shouldSuppress(t)) return; // глушим ненужное
+
+  pending.push(t);
+  if (!rafToken) rafToken = requestAnimationFrame(flushToasts);
+});
+
+function flushToasts() {
+  rafToken = 0;
+  const now = performance.now();
+  const uniq = new Map(); // key -> toast (последний в кадре)
+
+  for (const t of pending) {
+    const key = mkKey(t);
+    const last = lastByKey.get(key) || 0;
+    // пропускаем частые дубли в окне коалесинга
+    if (now - last < TOAST_COALESCE_MS) continue;
+    uniq.set(key, t); // перезаписываем — остаётся последний
+  }
+  pending.length = 0;
+
+  // Ограничим очередь: если уже много, не добавляем новые "info/success"
+  const current = queueLen();
+  const candidates = [...uniq.values()];
+
+  for (const t of candidates) {
+    const key = mkKey(t);
+    const isImportant = IMPORTANT.has(t.type);
+
+    if (!isImportant && queueLen() >= TOAST_QUEUE_LIMIT) {
+      // мягко отбрасываем низкоприоритетные
+      continue;
+    }
+
+    lastByKey.set(key, now);
+    eventBus.emit("ui:toast:show", t);
+  }
+}
+
 // =============================================================================
 // ПОКАЗАТЬ УВЕДОМЛЕНИЕ
 // =============================================================================
@@ -190,7 +264,7 @@ export function initToast() {
   }
 
   // Слушаем событие показа уведомления
-  eventBus.on("ui:toast", showToast);
+  eventBus.on("ui:toast:show", showToast);
 
   console.log("✅ Toast system initialized");
 }

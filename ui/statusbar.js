@@ -12,6 +12,8 @@ import { getTheme, applyTheme } from "../core/theme.js";
 
 let currentQuery = "";
 let lastSavedAt = null;
+let isDirty = false;
+let statusMounted = false;
 
 const THEME_LABELS = {
   light: "Light",
@@ -21,18 +23,28 @@ const THEME_LABELS = {
 };
 
 const VIEW_KEY = "linkapp-view-mode";
+
 function getViewMode() {
   return localStorage.getItem(VIEW_KEY) === "rows" ? "rows" : "tiles";
 }
+
 function applyViewMode(mode = "tiles") {
   const m = mode === "rows" ? "rows" : "tiles";
   document.documentElement.dataset.view = m;
   localStorage.setItem(VIEW_KEY, m);
 
-  // Подпись и иконка на кнопке в статус-баре (если уже отрендерена)
+  // Кнопка может отсутствовать (десктоп) — не падаем
   const btn = document.querySelector("#app-status .status-view-btn");
   if (btn) {
-    btn.querySelector(".label").textContent = m === "rows" ? "List" : "Tiles";
+    const grid = btn.querySelector(".ico-grid");
+    const list = btn.querySelector(".ico-list");
+    if (grid && list) {
+      grid.style.display = m === "rows" ? "none" : "";
+      list.style.display = m === "tiles" ? "none" : "";
+    }
+    const label = m === "rows" ? "Switch to tiles" : "Switch to list";
+    btn.setAttribute("aria-label", label);
+    btn.title = label;
   }
 }
 
@@ -78,9 +90,122 @@ function formatAgo(ts) {
   return `${h}h ago`;
 }
 
+function bindFlexScrolling(root) {
+  const flex = root.querySelector(".status-flex");
+  if (!flex) return;
+
+  // wheel: вертикальное колесо → горизонтальный скролл
+  flex.addEventListener(
+    "wheel",
+    (e) => {
+      // если есть «горизонтальная» компонента, оставим как есть
+      const delta =
+        Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      flex.scrollLeft += delta;
+      e.preventDefault();
+    },
+    { passive: false }
+  );
+
+  // drag-to-scroll (pointer)
+  let isDown = false,
+    startX = 0,
+    startLeft = 0;
+  flex.addEventListener("pointerdown", (e) => {
+    isDown = true;
+    startX = e.clientX;
+    startLeft = flex.scrollLeft;
+    flex.setPointerCapture(e.pointerId);
+    flex.style.cursor = "grabbing";
+  });
+  flex.addEventListener("pointermove", (e) => {
+    if (!isDown) return;
+    flex.scrollLeft = startLeft - (e.clientX - startX);
+  });
+  const stop = (e) => {
+    if (!isDown) return;
+    isDown = false;
+    flex.releasePointerCapture?.(e.pointerId);
+    flex.style.cursor = "grab";
+  };
+  flex.addEventListener("pointerup", stop);
+  flex.addEventListener("pointercancel", stop);
+
+  // фейды по краям
+  const update = () => {
+    const atStart = flex.scrollLeft <= 1;
+    const atEnd = flex.scrollLeft + flex.clientWidth >= flex.scrollWidth - 1;
+    flex.classList.toggle("at-start", atStart);
+    flex.classList.toggle("at-end", atEnd);
+  };
+  flex.addEventListener("scroll", update);
+  window.addEventListener("resize", update);
+  // первичный расчёт
+  requestAnimationFrame(update);
+}
+
 function currentThemeLabel() {
   const t = getTheme() || "system";
   return THEME_LABELS[t] || t;
+}
+
+// Хелпер: проводка горизонтального скролла для .status-flex
+function wireStatusFlex(rootEl) {
+  const flex = rootEl.querySelector(".status-flex");
+  if (!flex || flex.dataset.wired) return; // защита от повторной проводки
+  flex.dataset.wired = "1";
+
+  // Фейды по краям
+  const updateFades = () => {
+    const atStart = flex.scrollLeft <= 1;
+    const atEnd = flex.scrollWidth - flex.clientWidth - flex.scrollLeft <= 1;
+    flex.classList.toggle("at-start", atStart);
+    flex.classList.toggle("at-end", atEnd);
+  };
+  flex.addEventListener("scroll", updateFades, { passive: true });
+  updateFades();
+
+  // Колесо мыши => горизонтальный скролл
+  flex.addEventListener(
+    "wheel",
+    (e) => {
+      if (!e.ctrlKey && Math.abs(e.deltaY) > 0) {
+        e.preventDefault(); // важно: иначе страница будет скроллиться
+        flex.scrollLeft += e.deltaY;
+      }
+    },
+    { passive: false }
+  );
+
+  // Перетаскивание содержимого (pointer events)
+  let dragging = false,
+    startX = 0,
+    startLeft = 0;
+  flex.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    startX = e.clientX;
+    startLeft = flex.scrollLeft;
+    flex.setPointerCapture(e.pointerId);
+    flex.style.cursor = "grabbing";
+  });
+  flex.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    flex.scrollLeft = startLeft - (e.clientX - startX);
+  });
+  flex.addEventListener("pointerup", (e) => {
+    dragging = false;
+    flex.releasePointerCapture(e.pointerId);
+    flex.style.cursor = "grab";
+  });
+}
+
+function updateFlexOverflow() {
+  const flex = document.querySelector("#app-status .status-flex");
+  if (!flex) return;
+  const atStart = flex.scrollLeft <= 1;
+  const atEnd = flex.scrollLeft + flex.clientWidth >= flex.scrollWidth - 1;
+  flex.classList.toggle("at-start", atStart);
+  flex.classList.toggle("at-end", atEnd);
 }
 
 export function renderStatusBar() {
@@ -88,94 +213,82 @@ export function renderStatusBar() {
   if (!el) return;
 
   const { pagesTotal, curIdx, sectionsCount, linksCount } = getStats();
-  const savedText = formatAgo(lastSavedAt);
+  const savedText = lastSavedAt ? formatAgo(lastSavedAt) : "—";
   const activeName = (storage.saves?.getActiveName?.() || "").trim();
-  const themeLabel = (typeof getTheme === "function" && getTheme()) || "system";
+  const mode = getViewMode(); // "tiles" | "rows"
 
   el.innerHTML = `
-    <div class="status-flex" title="Counts on current page">
-      <span>Page ${pagesTotal ? curIdx + 1 : 0}/${pagesTotal}</span>
-      <span class="divider">•</span>
-      <span>Sections: ${sectionsCount}</span>
-      <span class="divider">•</span>
-      <span>Links: ${linksCount}</span>
+    <div class="status-flex" title="Scroll for more">
       ${
         activeName
-          ? `<span class="divider">•</span><span class="active-name" title="Active workspace"> ${escapeHtml(
+          ? `<span class="ws-name" title="Workspace">${escapeHtml(
               activeName
-            )}</span>`
+            )}</span>
+             <span class="vsep" aria-hidden="true"></span>`
           : ""
       }
+      <span>Page ${pagesTotal ? curIdx + 1 : 0}/${pagesTotal}</span>
+      <span class="vsep" aria-hidden="true"></span>
+      <span>Sections: ${sectionsCount}</span>
+      <span class="vsep" aria-hidden="true"></span>
+      <span>Links: ${linksCount}</span>
       ${
         currentQuery
-          ? `<span class="divider">•</span><span>Search: “${escapeHtml(
-              currentQuery
-            )}”</span>`
+          ? `<span class="vsep" aria-hidden="true"></span>
+             <span>Search: “${escapeHtml(currentQuery)}”</span>`
           : ""
       }
     </div>
 
-    <span class="saved" title="Last local save time">Saved ${savedText}</span>
+    <span class="save-indicator" data-state="${isDirty ? "dirty" : "saved"}"
+      title="${
+        isDirty
+          ? "Unsaved changes"
+          : lastSavedAt
+          ? `Saved ${formatAgo(lastSavedAt)}`
+          : "Saved"
+      }">
+  <i class="dot" aria-hidden="true"></i>
+</span>
 
-    <button class="status-theme-btn" type="button" aria-label="Toggle theme (Alt+T)" title="Toggle theme (Alt+T)">
-      ${escapeHtml(themeLabel)}
-    </button>
-    <div class="status-flex" title="Counts on current page">
-    <span>Page ${pagesTotal ? curIdx + 1 : 0}/${pagesTotal}</span>
-    <span class="divider">•</span>
-    <span>Sections: ${sectionsCount}</span>
-    <span class="divider">•</span>
-    <span>Links: ${linksCount}</span>
-    ${
-      currentQuery
-        ? `<span class="divider">•</span><span>Search: “${escapeHtml(
-            currentQuery
-          )}”</span>`
-        : ""
-    }
-  </div>
-
-  <span class="saved" title="Last local save time">Saved ${savedText}</span>
-
-  <!-- NEW: переключатель вида -->
-  <button class="status-view-btn" type="button" aria-label="Toggle view (Tiles/List)" title="Toggle view (Tiles/List)">
-    <span class="label">Tiles</span>
-    <span class="mi" aria-hidden="true" style="display:inline-flex;gap:6px;margin-left:6px;">
-      <!-- Иконки не переключаем JS-ом, просто текст меняем; так проще -->
-      <svg class="ico-grid" viewBox="0 0 24 24" width="16" height="16">
+    <button class="status-view-btn" type="button" aria-label="Toggle view">
+      <svg class="ico-grid" viewBox="0 0 24 24" width="16" height="16" style="${
+        mode === "rows" ? "display:none" : ""
+      }">
         <path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z" fill="none" stroke="currentColor" stroke-width="2"/>
       </svg>
-      <svg class="ico-list" viewBox="0 0 24 24" width="16" height="16">
+      <svg class="ico-list" viewBox="0 0 24 24" width="16" height="16" style="${
+        mode === "tiles" ? "display:none" : ""
+      }">
         <path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
-    </span>
-  </button>
+    </button>
 
-  <button class="status-theme-btn" type="button" aria-label="Toggle theme (Alt+T)" title="Toggle theme (Alt+T)">
-    ${currentThemeLabel()}
-  </button>
+    <button class="status-theme-btn" type="button" aria-label="Toggle theme (Alt+T)" title="Toggle theme (Alt+T)">
+      ${currentThemeLabel()}
+    </button>
   `;
 
-  // Применим сохранённый режим и подпись
-  applyViewMode(getViewMode());
-
-  // Кнопка переключения вида
-  el.querySelector(".status-view-btn")?.addEventListener("click", () => {
-    const next = getViewMode() === "tiles" ? "rows" : "tiles";
-    applyViewMode(next);
-  });
-
-  // Переключение темы кликом по кнопке
-  el.querySelector(".status-theme-btn")?.addEventListener("click", () => {
-    const order = ["system", "light", "sea", "dark"];
-    const cur = (typeof getTheme === "function" && getTheme()) || "system";
-    const next = order[(order.indexOf(cur) + 1) % order.length];
-    if (typeof applyTheme === "function") applyTheme(next);
-    eventBus.emit("ui:theme:changed", { mode: next }); // страховка
-  });
+  // применим сохранённый режим и настроим скролл только середины
+  applyViewMode(mode);
+  wireStatusFlex(el);
 }
 
+// принять внешнее «установи вид»
+eventBus.on("ui:view:set", ({ mode }) => {
+  if (mode === "tiles" || mode === "rows") applyViewMode(mode);
+});
+
+// авто-правило: если мы НЕ compact и НЕ overlay, rows → tiles
+eventBus.on("viewport:updated", ({ compact900, overlay }) => {
+  if (!compact900 && !overlay && getViewMode() === "rows") {
+    applyViewMode("tiles");
+  }
+});
+
 export function initStatusBar() {
+  if (statusMounted) return; // 🔒 защита от повторной инициализации
+  statusMounted = true;
   // гарантируем контейнер
   let el = document.getElementById("app-status");
   if (!el) {
@@ -189,13 +302,89 @@ export function initStatusBar() {
   // первый рендер
   renderStatusBar();
 
+  // Поддерживаем фейды при скролле и ресайзе
+  el.addEventListener(
+    "scroll",
+    (e) => {
+      if (e.target.classList?.contains("status-flex")) updateFlexOverflow();
+    },
+    true
+  );
+  window.addEventListener("resize", updateFlexOverflow);
+
+  // Делегирование кликов по кнопкам бара
+  el.addEventListener("click", (e) => {
+    if (e.target.closest(".status-view-btn")) {
+      const next = getViewMode() === "tiles" ? "rows" : "tiles";
+      applyViewMode(next);
+      // Переключим иконки без перерендера
+      const grid = el.querySelector(".status-view-btn .ico-grid");
+      const list = el.querySelector(".status-view-btn .ico-list");
+      if (grid && list) {
+        grid.style.display = next === "rows" ? "none" : "";
+        list.style.display = next === "tiles" ? "none" : "";
+      }
+    }
+
+    if (e.target.closest(".status-theme-btn")) {
+      const order = ["system", "light", "sea", "dark"];
+      const cur = getTheme?.() || "system";
+      const next = order[(order.indexOf(cur) + 1) % order.length];
+      applyTheme?.(next);
+      eventBus.emit("ui:theme:changed", { mode: next });
+    }
+  });
+
   // подписки → перерисовка
   const rerender = () => renderStatusBar();
 
-  eventBus.on("storage:loaded", rerender);
+  // Позволяем крутить колёсиком по горизонтали и тянуть «за контент» (трекпад/мышь)
+  const mid = el.querySelector(".status-flex");
+  if (mid) {
+    // wheel: вертикальное колёсико -> горизонтальный скролл
+    mid.addEventListener(
+      "wheel",
+      (e) => {
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+          mid.scrollLeft += e.deltaY;
+        }
+      },
+      { passive: true }
+    );
+
+    // drag-to-scroll (простой «хэндлер» без выделения текста)
+    let drag = false,
+      startX = 0,
+      startLeft = 0;
+    mid.addEventListener("pointerdown", (e) => {
+      drag = true;
+      startX = e.clientX;
+      startLeft = mid.scrollLeft;
+      mid.setPointerCapture(e.pointerId);
+    });
+    mid.addEventListener("pointermove", (e) => {
+      if (!drag) return;
+      mid.scrollLeft = startLeft - (e.clientX - startX);
+    });
+    mid.addEventListener("pointerup", () => (drag = false));
+    mid.addEventListener("pointercancel", () => (drag = false));
+  }
+
+  eventBus.on("storage:loaded", () => {
+    isDirty = false;
+    lastSavedAt = null;
+    renderStatusBar();
+  });
+
   eventBus.on("storage:updated", () => {
-    lastSavedAt = new Date();
-    rerender();
+    isDirty = true;
+    renderStatusBar();
+  });
+
+  eventBus.on("storage:saved", (payload = {}) => {
+    lastSavedAt = new Date(payload.at || Date.now());
+    isDirty = false;
+    renderStatusBar();
   });
 
   eventBus.on("pages:switched", rerender);

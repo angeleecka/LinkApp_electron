@@ -1,163 +1,235 @@
 /* =========================================================
-   Pagination — CLEAN, grouped, annotated (без удаления)
+   Pagination — REORGANIZED (логический порядок: контейнер → дети → состояния → темы)
    ========================================================= */
 
-/* ========== 1) CONTAINER (липкий над статусбаром) ========== */
+/* ========== 1) MAIN CONTAINER ========== */
 #pagination {
+  /* Positioning */
   position: sticky;
   bottom: var(--statusbar-h, 28px);
   z-index: 5;
+  left: auto;
+  right: auto;
 
+  /* Layout */
   display: flex;
   align-items: center;
+  justify-content: flex-start; /* ◀ [лента] ▶ [+] */
   flex-wrap: nowrap;
   gap: 8px;
 
+  /* Sizing */
+  max-width: var(--content-max, 1100px);
+  width: 100%;
+
+  /* Spacing */
   padding: 2px 8px;
   margin: 8px 12px 0 12px;
+  margin-inline: auto !important;
 
-  /* Изначально было так: прозрачность могла «просвечивать» тему */
-  background: var(--pagination-bg, var(--surface, #fff));
+  /* Visual */
+  background: var(
+    --pagination-bg,
+    var(--bg)
+  ); /* ⚠️ БЫЛО: var(--surface, #fff) — изменено на var(--bg) */
   border-top: 1px solid
     var(--pagination-divider, var(--border, rgba(0, 0, 0, 0.12)));
   border-radius: 0;
 
-  /* важно: не обрезаем детей (иначе пропадают стрелки/крестики) */
-  overflow: visible !important;
-
-  max-width: var(--content-max, 1100px);
-  width: 100%;
-  margin-inline: auto !important; /* центр блока */
-  left: auto; /* подстраховка от чужих позиц */
-  right: auto;
-
-  /* OVERRIDE: solid bg — убираем «прозрачный» вид на цветных темах */
-  background: var(--pagination-bg, var(--bg));
+  /* Important */
+  overflow: visible !important; /* ✅ критично: не обрезаем крестики и стрелки */
 }
 
-/* ========== 2) HORIZONTAL SCROLL STRIP ========== */
+/* Флекс-безопасность (если класс .flex добавляется динамически) */
+#pagination.flex {
+  overflow: visible !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+}
+
+/* ========== 2) SCROLL STRIP (горизонтальная лента страниц) ========== */
 #pagination .pagination-scroll {
-  flex: 1 1 auto; /* лента может сжиматься */
-  min-width: 0; /* критично для сжатия */
-  white-space: nowrap;
+  /* Flex */
+  flex: 1 1 auto;
+  min-width: 0; /* ✅ критично для корректного сжатия */
+
+  /* Scroll behavior */
   overflow-x: auto;
   overflow-y: hidden;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* скрываем горизонт. скроллбар */
 
+  /* Layout */
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 6px;
+  white-space: nowrap;
 
-  /* внутренние «поля» ленты */
+  /* Spacing */
   padding-inline: 8px;
-  box-sizing: border-box;
   scroll-padding-inline: 8px;
+  box-sizing: border-box;
   scrollbar-gutter: stable both-edges;
-
-  /* скрыть горизонт. скроллбар */
-  scrollbar-width: none;
 }
+
 #pagination .pagination-scroll::-webkit-scrollbar {
   height: 0;
 }
 
-/* ========== 3) BUTTONS (◀ ▶ + и номера страниц) ========== */
+/* ========== 3) БАЗОВЫЕ КНОПКИ (◀ ▶ + и номера страниц) ========== */
 #pagination .pagination-btn {
+  /* Reset */
   appearance: none;
   border: 0;
   background: transparent;
   border-radius: 0;
+
+  /* Sizing */
   padding: 4px 8px;
   min-height: 28px;
+  flex: 0 0 auto;
+
+  /* Typography */
   line-height: 1;
   font: inherit;
   color: inherit;
 
+  /* Interaction */
   cursor: pointer;
-  flex: 0 0 auto;
   opacity: 0.95;
 }
+
+/* ⚠️ ПОДОЗРЕНИЕ: кнопка "+" может быть слишком маленькой из-за:
+   1) padding: 4px 8px — может быть недостаточно
+   2) min-height: 28px — но нет min-width
+   3) line-height: 1 — сжимает контент по вертикали
+   
+   РЕКОМЕНДАЦИЯ: добавить для кнопки "+" отдельный класс типа .pagination-add-btn с увеличенным padding */
+
 #pagination .pagination-btn:hover:not(:disabled) {
   background: var(--btn-hover-bg, rgba(0, 0, 0, 0.06));
   opacity: 1;
 }
+
 #pagination .pagination-btn:disabled {
   opacity: 0.4;
   cursor: default;
 }
 
-/* ========== 4) PAGE CHIP (ярлык страницы) ========== */
-#pagination .page-number {
-  /* DUP: селектор объявлялся дважды — объединяю в одном месте */
-  display: inline-flex; /* ручка/лейбл/крестик в ряд */
-  align-items: center;
-  gap: 6px;
-  position: relative; /* для .page-close */
-  white-space: nowrap;
-
-  --page-close-w: 16px;
-  padding-right: calc(var(--page-close-w) + 8px);
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  scroll-margin-left: 8px;
-}
-#pagination .page-number:last-child {
-  scroll-margin-right: 8px;
-}
-
-/* Активное состояние (и aria-current для надёжности) */
-#pagination .pagination-btn.active,
-#pagination .page-number[aria-current="page"] {
+/* Активное состояние */
+#pagination .pagination-btn.active {
   background: var(--chip-active-bg);
   color: var(--chip-active-fg);
   font-weight: 600;
-  border-radius: 6px; /* мягко, без «пилюль» */
+  border-radius: 6px;
   border-left: 1px solid var(--chip-active-fg);
   outline: none;
 }
 
-/* ========== 5) PAGE CLOSE (крестик у ярлыка) ========== */
+/* ========== 4) PAGE CHIP (ярлык страницы) ========== */
+#pagination .page-number {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative; /* для абсолютного .page-close */
+  white-space: nowrap;
+
+  /* Sizing */
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  /* Spacing for close button */
+  --page-close-w: 16px;
+  padding-right: calc(var(--page-close-w) + 8px);
+
+  /* Scroll margins */
+  scroll-margin-left: 8px;
+}
+
+#pagination .page-number:last-child {
+  scroll-margin-right: 8px;
+}
+
+/* Активный ярлык (с поддержкой aria-current) */
+#pagination .page-number[aria-current="page"] {
+  background: var(--chip-active-bg);
+  color: var(--chip-active-fg);
+  font-weight: 600;
+  border-radius: 6px;
+  border-left: 1px solid var(--chip-active-fg);
+  outline: none;
+  /* ⚠️ ДУБЛЬ: те же стили, что и .pagination-btn.active — можно объединить */
+}
+
+/* ========== 5) PAGE LABEL (текст внутри ярлыка) ========== */
+#pagination .page-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========== 6) DRAG HANDLE (иконка перетаскивания) ========== */
+#pagination .page-handle {
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0.55;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: element;
+}
+
+#pagination .page-number:hover .page-handle {
+  opacity: 0.85;
+}
+
+#pagination .page-number.dragging .page-handle {
+  cursor: grabbing;
+  opacity: 1;
+}
+
+/* ========== 7) PAGE CLOSE (крестик для закрытия страницы) ========== */
 #pagination .page-number .page-close {
+  /* Positioning */
   position: absolute;
   right: 4px;
   top: 50%;
+  transform: translateY(-50%);
+
+  /* Sizing */
   width: var(--page-close-w);
   height: var(--page-close-w);
-  transform: translateY(-50%);
-  line-height: 1;
 
-  /* DUP props: opacity была 0.6 и 0.55 — оставляю последнюю */
-  opacity: 0.55; /* DUP: предыдущее 0.6 было избыточно */
+  /* Visual */
+  line-height: 1;
+  opacity: 0.55; /* ⚠️ БЫЛО: 0.6 в одном месте — оставляю 0.55 */
+  color: var(--chip-active-fg);
+
+  /* Interaction */
   display: inline;
   cursor: pointer;
-  color: var(--chip-active-fg);
 }
+
 #pagination .page-number:hover .page-close,
 #pagination .page-number.active .page-close,
 #pagination .page-number[aria-current="page"] .page-close {
-  /* Этот селектор объединяет два очень похожих изначальных */
   display: inline-block;
   opacity: 0.9;
   color: var(--accent);
+  /* ⚠️ ПОТЕНЦИАЛЬНАЯ ПРОБЛЕМА: color меняется с var(--chip-active-fg) на var(--accent) */
 }
-#pagination .page-number .page-close:hover {
+
+#pagination .page-close:hover {
   opacity: 1;
   color: var(--chip-active-fg);
+  /* ⚠️ КОНФЛИКТ: при ховере крестика цвет возвращается обратно — может быть неожиданно */
 }
 
-/* ========== 6) FLEX LAYOUT SAFETY ========== */
-#pagination.flex {
-  overflow: visible !important;
-  flex-wrap: nowrap !important;
-  justify-content: flex-start !important; /* порядок: ◀ [лента] ▶ [+] */
-  align-items: center !important;
-}
-
-/* ========== 7) DND DECOR ========== */
+/* ========== 8) DRAG & DROP DECORATIONS ========== */
 #pagination .page-drop-marker {
   width: 2px;
   height: 22px;
@@ -167,56 +239,77 @@
   display: inline-block;
   vertical-align: middle;
 }
+
 #pagination .page-number.dragging {
   opacity: 0.6;
 }
 
-/* ========== 8) DRAG HANDLE + LABEL (на будущее) ========== */
-#pagination .page-handle {
-  font-size: 12px;
-  line-height: 1;
-  opacity: 0.55;
-  cursor: grab;
-  user-select: none;
-  -webkit-user-drag: element;
-}
-#pagination .page-number:hover .page-handle {
-  opacity: 0.85;
-}
-#pagination .page-number.dragging .page-handle {
-  cursor: grabbing;
-  opacity: 1;
-}
-#pagination .page-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* ========== 9) THEME TWEAKS (DARK override) ========== */
-/* OVERRIDE: здесь ты задаёшь другие актив/hover цвета в дарк —
-   это намеренно переопределит chip-токены выше */
-html[data-theme="dark"] #pagination {
-  background: var(
-    --pagination-bg,
-    rgba(20, 20, 20, 0.96)
-  ); /* теперь будет перебито token'ом */
-  border-top-color: var(--pagination-divider, rgba(255, 255, 255, 0.12));
-}
-html[data-theme="dark"] #pagination .pagination-btn:hover:not(:disabled) {
-  background: var(--btn-hover-bg, rgba(255, 255, 255, 0.08));
-}
-html[data-theme="dark"] #pagination .pagination-btn.active {
-  background: var(--btn-active-bg, rgba(255, 255, 255, 0.14)); /* OVERRIDE */
-}
-
-/* ========== 10) BODY BOTTOM PADDING (под липкие блоки) ========== */
+/* ========== 9) BODY PADDING (компенсация под липкие элементы) ========== */
 #app-body {
-  /* min-height вычисляется в JS, тут только отступ снизу */
   padding-bottom: calc(
     var(--statusbar-h, 28px) + var(--pagination-h, 44px) + 8px
   );
+  /* ℹ️ min-height вычисляется в JS */
 }
 
-/* ========== 11) RESPONSIVE (резерв для будущего) ========== */
+/* ========== 10) DARK THEME OVERRIDES ========== */
+html[data-theme="dark"] #pagination {
+  background: var(--pagination-bg, rgba(20, 20, 20, 0.96));
+  border-top-color: var(--pagination-divider, rgba(255, 255, 255, 0.12));
+  /* ⚠️ ДУБЛЬ: background переопределяется здесь, но уже был задан в основном #pagination */
+}
+
+html[data-theme="dark"] #pagination .pagination-btn:hover:not(:disabled) {
+  background: var(--btn-hover-bg, rgba(255, 255, 255, 0.08));
+}
+
+html[data-theme="dark"] #pagination .pagination-btn.active {
+  background: var(--btn-active-bg, rgba(255, 255, 255, 0.14));
+  /* ⚠️ ПЕРЕОПРЕДЕЛЕНИЕ: в основном блоке было var(--chip-active-bg) */
+}
+
+/* ========== 11) RESPONSIVE (резерв) ========== */
 /* ... */
+
+/* =========================================================
+   📋 ИТОГОВЫЙ АНАЛИЗ ПРОБЛЕМЫ С КНОПКОЙ "+"
+   =========================================================
+
+   НАЙДЕННЫЕ ПРОБЛЕМЫ:
+   
+   1. ❌ НЕТ min-width для .pagination-btn
+      → Кнопка может сжаться до размера символа
+   
+   2. ❌ line-height: 1 слишком жесткое
+      → Уменьшает визуальную высоту контента
+   
+   3. ❌ padding: 4px 8px может быть мало
+      → Для символа "+" нужно больше пространства
+   
+   4. ⚠️ font: inherit наследует размер шрифта
+      → Если родитель имеет маленький font-size, кнопка будет крошечной
+   
+   РЕКОМЕНДУЕМОЕ РЕШЕНИЕ:
+   
+   Добавить специфичное правило для кнопки "+":
+   
+   #pagination .pagination-btn.add-page-btn,
+   #pagination .pagination-btn[aria-label*="Add"],
+   #pagination .pagination-btn[title*="Add"] {
+     min-width: 32px;
+     min-height: 32px;
+     padding: 6px 10px;
+     font-size: 18px;
+     line-height: 1.2;
+   }
+   
+   ========================================================= */
+
+/* Фикс для кнопки добавления страницы */
+#pagination .pagination-btn.add-page-btn {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 18px;
+  line-height: 1.2;
+}

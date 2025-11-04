@@ -1,30 +1,74 @@
 /* panel.css — правая панель плагина и отжим контента */
 
 :root {
-  --panel-w: 360px; /* ширина панели; потом можно сделать настраиваемой */
+  --app-min: 380px; /* минимальная ширина LinkApp (мобильная) */
+  --study-min: 280px; /* минимум панели */
+  --study-max: 1600px; /* потолок панели на очень широких мониторах */
+  --study-ideal: calc(
+    100vw - var(--app-min)
+  ); /* ← вот «100% – мобильный LinkApp» */
+  --study-w: var(--study-ideal);
 }
 
 /* Фиксированная правая панель */
 .study-panel {
   position: fixed;
-  inset: 0 0 0 auto; /* top:0; right:0; bottom:0 */
-  width: var(--panel-w);
-  background: var(--surface-1);
-  border-left: 1px solid var(--border);
-  z-index: 50;
+  inset: 0 auto 0 0; /* ← top=0 вместо var(--header-h) */
+  width: clamp(
+    var(--study-min),
+    var(--study-w, var(--study-ideal)),
+    var(--study-max)
+  );
+  background: var(--bg);
+  color: var(--text);
+  border-right: 1px solid var(--border);
+  transform: translateX(-100%); /* спрятана слева */
+  transition: transform var(--dur-1, 120ms) ease;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  z-index: var(--z-popover, 3000);
+}
+body.with-study-panel #study-panel {
+  transform: translateX(0);
+  box-shadow: var(--shadow-1);
+}
+/* Или если хотите тонкую разделительную линию справа: */
+body.with-study-panel .study-panel-header {
+  border-right: 1px solid var(--header-border);
+  border-bottom: none;
+}
+/* сдвигаем контент, чтобы панель его не перекрывала */
+/* Когда панель открыта И не в overlay — отжимаем контент */
+body.with-study-panel:not(.study-overlay) #app-header,
+body.with-study-panel:not(.study-overlay) #app-body,
+body.with-study-panel:not(.study-overlay) #pagination,
+body.with-study-panel:not(.study-overlay) #app-status {
+  /* Убираем автоцентровку */
+  max-width: none !important;
+  margin-inline: 0 !important;
 
-  display: none; /* по умолчанию скрыта */
-  flex-direction: column;
+  /* Сдвигаем через padding (не margin!) */
+  padding-left: var(--study-w) !important;
+  box-sizing: border-box;
 }
 
-/* Показываем, когда включен режим */
-.with-study-panel .study-panel {
-  display: flex;
+/* Header-inner тоже должен учесть сдвиг */
+body.with-study-panel:not(.study-overlay) .header-inner {
+  margin-inline: 0 !important;
+  padding-inline: 2px !important; /* восстанавливаем боковые отступы */
 }
 
-/* Отжим всего приложения вправо, чтобы панель не перекрывала */
-.with-study-panel #linkapp-root {
-  padding-right: calc(var(--panel-w) + 16px);
+/* Statusbar: убираем внутреннюю центровку */
+body.with-study-panel:not(.study-overlay) #app-status .statusbar {
+  max-width: none !important;
+  margin-inline: 0 !important;
+}
+/* Вариант 2: панель как оверлей (узкие экраны) */
+body.with-study-panel.study-overlay #study-panel {
+  width: 100vw; /* перекрывает всё */
+}
+body.with-study-panel.study-overlay {
+  overflow: hidden; /* не скроллим фон под оверлеем */
 }
 
 /* Заголовок панели */
@@ -34,9 +78,14 @@
   justify-content: space-between;
   gap: 8px;
   padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-2);
+  border-bottom: 1px solid var(--header-border);
+  background: var(--header-bg);
+  color: var(--header-fg);
+  /* высота как у основного header */
+  min-height: var(--header-h, 56px);
+  box-sizing: border-box;
 }
+
 .study-title {
   font-weight: 600;
 }
@@ -66,10 +115,76 @@
   gap: 8px;
   min-height: 120px;
 }
+/* затемнитель под панелью (клик — закрыть) */
+.study-scrim {
+  position: fixed;
+  inset: var(--header-h, 56px) 0 0 0; /* ← перекрывает весь экран, включая header */
+  background: color-mix(
+    in oklab,
+    var(--overlay, rgba(0, 0, 0, 0.4)) 100%,
+    transparent
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-1, 120ms) ease;
+  z-index: calc(var(--z-popover, 1300) - 1);
+}
+body.with-study-panel .study-scrim {
+  opacity: 1;
+  pointer-events: auto;
+}
 
+/* на широких экранах можем «сдвигать» контент, чтобы панель не перекрывала */
+
+/* В overlay: контент НЕ отодвигаем */
+body.with-study-panel.study-overlay #app-header,
+body.with-study-panel.study-overlay #app-body,
+body.with-study-panel.study-overlay #pagination,
+body.with-study-panel.study-overlay #app-status {
+  margin-left: 0 !important;
+}
 /* Когда панель открыта — LinkApp становится «двухколоночным» на десктопе */
 @media (min-width: 1024px) {
   .with-study-panel .assignments-grid.grid-mode {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  body.with-study-panel.study-overlay .header-right .input-wrap {
+    display: none !important;
+  }
+  body.with-study-panel.study-overlay .header-right .icon-btn {
+    display: none !important;
+  }
+  body.with-study-panel.study-overlay .header-right .icon-btn.search-trigger,
+  body.with-study-panel.study-overlay .header-right .burger-btn {
+    display: inline-flex !important;
+  }
+}
+
+/* ==== FORCED COMPACT (когда панель сужает доступную ширину) ==== */
+
+/* эквивалент твоего @media (max-width: 1060px) — прячем поле поиска, показываем лупу */
+body.compact-1060 .header-right .search-box.input-wrap {
+  display: none !important;
+}
+body.compact-1060 .header-right .search-trigger {
+  display: inline-flex !important;
+}
+
+/* эквивалент твоего @media (max-width: 900px) — упрощаем всё под бургер */
+body.compact-900 .header-right .input-wrap {
+  display: none !important;
+}
+body.compact-900 .header-right .icon-btn {
+  display: none !important;
+}
+body.compact-900 .header-right .icon-btn.search-trigger,
+body.compact-900 .header-right .burger-btn {
+  display: inline-flex !important;
+}
+
+.kebab-left {
+  border: none;
+  font-size: 2rem;
+  padding-left: none;
 }

@@ -64,6 +64,9 @@ body {
   --z-popover: 3000;
   --z-modal: 5000;
   --z-toast: 6000;
+
+  --content-max: 1100px;
+  --page-gutter: 16px;
 }
 
 /* ====== СЕМАНТИЧЕСКИЕ ТОКЕНЫ (по умолчанию — светлая) ======
@@ -95,6 +98,8 @@ body {
   --menu-hover-bg: var(--btn-hover-bg);
 
   --toast-bg: var(--surface-1, #fff);
+  /* регулируй толщину: 1–2.2 */
+  --thin-plus-stroke: 1.6;
 }
 
 /* Общие базовые применения */
@@ -189,4 +194,87 @@ html[data-theme="dark"] .ui-icon-btn:hover {
 }
 *::-webkit-scrollbar-thumb:hover {
   background-color: var(--sb-thumb-hover);
+}
+/* Убирает «подпрыгивания» из-за системного скроллбара */ /*
+@supports (scrollbar-gutter: stable) {
+  html {
+    scrollbar-gutter: stable both-edges;
+  }
+}
+*/
+.ui-plus-btn {
+  font-size: 0; /* прячем текстовый '+' */
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  color: currentColor; /* берёт цвет из темы/кнопки */
+  padding: 0;
+}
+
+.ui-plus-btn::before {
+  content: "";
+  width: var(--plus-size, 18px);
+  height: var(--plus-size, 18px);
+  background: currentColor;
+  -webkit-mask: var(--thin-plus-mask) center/contain no-repeat;
+  mask: var(--thin-plus-mask) center/contain no-repeat;
+  transition: transform 0.12s ease;
+}
+.ui-plus-btn:hover::before {
+  transform: scale(1.06);
+}
+
+/* SVG-маска как custom-property (тонкие линии, скруглённые концы) */
+/*:root {
+  --thin-plus-mask: url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\
+<path d="M12 4v16M4 12h16" fill="none" stroke="black" stroke-linecap="round" stroke-width="%ST%"/>\
+</svg>'.replace(
+      "%ST%",
+      var(--thin-plus-stroke)
+    ));*/
+
+/* уже есть, но на всякий случай */
+/*--linkapp-left: 0px;
+  --linkapp-width: 100vw;
+}*/
+
+/* База модалки: всегда поверх панели и без «плавающих» отступов */
+.modal-overlay {
+  position: fixed;
+  inset: 0 !important; /* сброс любых top/left/right/bottom */
+  left: 0 !important;
+  width: 100vw !important;
+
+  z-index: 4000 !important; /* выше study-panel/burger/popovers */
+  display: grid; /* центрирование содержимого */
+  place-items: center;
+  transform: none !important; /* если где-то задавался translate */
+}
+
+/* Когда панель сужает полосу — ограничиваем overlay полосой LinkApp */
+body.with-study-panel .modal-overlay,
+body.compact-1060 .modal-overlay,
+body.compact-900 .modal-overlay {
+  left: var(--linkapp-left) !important;
+  width: var(--linkapp-width) !important;
+  right: auto !important;
+}
+
+/* На всякий случай поднимем сам диалог ещё на 1 слой */
+.modal-overlay .modal {
+  position: relative;
+  z-index: 4001;
+}
+/* Центруем колонку LinkApp и даём поля по бокам на десктопе */
+@media (min-width: 901px) {
+  #app-body {
+    max-width: var(--content-max, 1100px);
+    margin-inline: auto; /* центрируем */
+    padding-inline: var(--page-gutter, 12px); /* левый/правый отступы */
+    box-sizing: border-box;
+  }
 }

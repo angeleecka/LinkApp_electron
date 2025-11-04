@@ -24,7 +24,7 @@
   max-width: none;
   width: 100%;
   margin: 0;
-  padding: 6px 10px;
+  padding: 6px 2px;
   border-bottom: 1px solid var(--header-border);
   background: var(--header-bg);
   color: var(--header-fg);
@@ -51,7 +51,7 @@
 .header-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 1px;
   flex: 0 0 auto;
 }
 
@@ -128,7 +128,7 @@
 .input-wrap input {
   width: 100%;
   min-height: 32px;
-  padding: 8px 28px 8px 12px;
+  padding: 8px 8px 8px 12px;
   border: 1px solid var(--input-border);
   background: var(--input-bg);
   color: var(--input-text);
@@ -169,18 +169,6 @@
 /* Ширины и эластика */
 .header-right .quick-add {
   max-width: 360px;
-  display: inline-flex; /* DUPLICATE? ниже есть ещё один display */
-  align-items: center; /* DUPLICATE? */
-  gap: 8px; /* DUPLICATE? */
-}
-#quickAddInput {
-  padding-right: 30px;
-}
-/* DUPLICATE? quick-add ниже повторяет часть правил */
-.quick-add.input-wrap {
-  /* DUPLICATE? координировать с .header-right .quick-add */
-  flex: 1 1 360px;
-  min-width: 180px;
 }
 
 .header-right .search-box {
@@ -305,16 +293,39 @@ html[data-theme="dark"] .header-burger-popover {
 /* ========== 9) SEARCH POPOVER ========== */
 .header-search-popover {
   position: fixed;
-  min-width: min(92vw, 380px);
-  max-width: 420px;
+  /* важное: убираем внутренние паддинги у контейнера, чтобы ширина была ровно w */
+  padding: 0;
+
+  min-width: 0;
+  max-width: 100vw;
+
   background: var(--popover-bg, var(--header-bg, var(--surface-1)));
   color: var(--popover-fg, var(--header-fg, var(--text)));
   border: 1px solid var(--popover-border, var(--border));
   border-radius: 10px;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
-  padding: 8px;
-  z-index: var(--z-popover, 1300);
+
+  transform: none !important;
+  left: 0;
+  top: 0; /* JS переустанавливает */
+  right: auto !important;
+  bottom: auto !important;
+  box-sizing: border-box;
+  z-index: 4000;
 }
+
+#searchInputMobile {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px; /* паддинги у ИНПУТА, не у контейнера */
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-1);
+  color: var(--text);
+  outline-offset: 2px;
+}
+
 .header-search-popover[hidden] {
   display: none !important;
 }
@@ -325,6 +336,9 @@ html[data-theme="dark"] .header-burger-popover {
   border-radius: 8px;
   background: var(--surface-1);
   color: var(--text);
+  box-sizing: border-box;
+  display: block;
+  outline-offset: 2px; /* фокус-ободок не прилипает к краю */
 }
 
 /* ========== 10) MODAL HELPERS (Save As / Snapshot / Workspaces) ========== */
@@ -559,7 +573,7 @@ html[data-theme="sea"] .header-burger-popover {
 /* Чуть плотнее на узких */
 @media (max-width: 768px) {
   #app-header {
-    padding: 8px 10px;
+    padding: 8px 2px;
   }
   .header-right {
     gap: 4px;
@@ -571,4 +585,126 @@ html[data-theme="sea"] .header-burger-popover {
   .header-search-popover {
     max-width: 92vw;
   }
+}
+
+/* ===== FORCED COMPACT (когда панель сужает доступную ширину) ===== */
+
+/* Эквивалент @media (max-width: 1060px) */
+body.compact-1060 .header-right .search-box.input-wrap {
+  display: none !important;
+}
+body.compact-1060 .header-right .icon-btn.search-trigger {
+  display: inline-flex !important;
+}
+
+/* Эквивалент @media (max-width: 900px) */
+body.compact-900 #app-header .primary-save {
+  display: none !important;
+}
+body.compact-900 .header-right .search-box.input-wrap {
+  display: none !important;
+}
+body.compact-900 .header-right .quick-add.input-wrap {
+  display: inline-flex !important;
+  flex: 1 1 auto;
+  min-width: 140px;
+}
+body.compact-900 .header-right .icon-btn {
+  display: none !important;
+}
+body.compact-900 .header-right .icon-btn.search-trigger,
+body.compact-900 .header-right .icon-btn.burger-btn {
+  display: inline-flex !important;
+}
+
+/* Statusbar тоже должен сжаться */
+body.compact-900 #app-status {
+  gap: 4px;
+  padding-inline: 1px;
+}
+body.compact-900 #app-status .hide-on-mobile {
+  display: none;
+}
+
+/* Fix: search popover exact sizing — no extra gap on the right */
+.header-search-popover {
+  padding: 0 !important; /* контейнер без внутренних отступов */
+  min-width: 0 !important; /* не навязываем минимальную ширину */
+  max-width: 100vw; /* страховка, но не мешает JS-ширине */
+  box-sizing: border-box;
+}
+#searchInputMobile {
+  display: block;
+  width: 100%;
+  margin: 0; /* на всякий случай */
+  box-sizing: border-box; /* ширина = ровно ширине контейнера */
+}
+
+/* Quick-Add: большой тонкий плюс в суффиксе */
+#app-header .quick-add .qa-go {
+  padding: 0;
+  font-size: 0; /* прячем текстовый '+' */
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0; /* без рамки */
+  background: transparent;
+  --plus-size: 17px; /* размер значка */
+  width: 30px;
+  height: 30px; /* сама кнопка чуть компактнее */
+
+  border: 0;
+  color: currentColor;
+  padding: 0;
+}
+
+/* рисуем «тонкий» плюс через маску SVG (чёткие линии в любой теме) */
+#app-header .quick-add .qa-go::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: currentColor; /* цвет как у текста/иконок */
+  -webkit-mask: url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\
+<path d="M12 5v14M5 12h14" fill="none" stroke="black" stroke-width="2" stroke-linecap="round"/></svg>')
+    center / contain no-repeat;
+  mask: url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\
+<path d="M12 5v14M5 12h14" fill="none" stroke="black" stroke-width="2" stroke-linecap="round"/></svg>')
+    center / contain no-repeat;
+}
+
+/* оставляем запас справа под увеличенную кнопку */
+#quickAddInput {
+  padding-right: 34px;
+}
+
+/* === Vars для геометрии полосы LinkApp (JS будет обновлять) === */
+:root {
+  --linkapp-left: 0px;
+  --linkapp-width: 100vw;
+}
+
+/* === База модалки: всегда поверх панели === */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal, 2000); /* выше study-panel/popovers */
+}
+
+/* Когда интерфейс в «сжатом» режиме/панель открыта — 
+   ограничиваем оверлей полосой LinkApp */
+body.with-study-panel .modal-overlay,
+body.compact-1060 .modal-overlay,
+body.compact-900 .modal-overlay {
+  left: var(--linkapp-left);
+  width: var(--linkapp-width);
+  right: auto;
+}
+
+/* На всякий случай у самого диалога повысим слой */
+.modal-overlay .modal,
+.modal {
+  z-index: calc(var(--z-modal, 2000) + 1);
 }

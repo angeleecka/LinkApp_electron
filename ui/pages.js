@@ -14,45 +14,178 @@ import { renderSections } from "./sections.js";
 
 let currentSearchQuery = "";
 
+// =============================================================================
+// ФИКС ДЛЯ PAGE JUMPER POPOVER v3
+// =============================================================================
+// Три режима:
+// 1. Десктоп: инпут в titlebar, поповер под ним
+// 2. Мобайл: иконка → всплывающий инпут по центру + поповер под ним
+// 3. Compact: иконка → всплывающий инпут по центру LinkApp + поповер под ним
+// =============================================================================
+
 function mountPageTitleBar(container, page) {
+  const d = storage.get();
+
   const bar = document.createElement("div");
   bar.className = "page-titlebar";
 
-  // --- компактный "комбобокс": input + datalist ---
-  const d = storage.get();
-
+  // ===== Go to (jumper) =====
   const jumperWrap = document.createElement("div");
-  jumperWrap.className = "page-jumper-wrap";
+  jumperWrap.className = "goto-wrap page-jumper-wrap";
 
   const jumperInput = document.createElement("input");
   jumperInput.type = "text";
-  jumperInput.id = "page-jumper"; // важно: тот же id для хоткея Ctrl/Cmd+P
+  jumperInput.id = "page-jumper";
   jumperInput.className = "page-jumper-input";
   jumperInput.placeholder = "Go to… (№ or name)";
   jumperInput.autocomplete = "off";
 
-  const dl = document.createElement("datalist");
-  dl.id = "pages-datalist";
-
-  // подсказки: "1: Work", "2: Personal", ...
-  (d.pages || []).forEach((p, i) => {
-    const opt = document.createElement("option");
-    const full =
+  const pages = (d.pages || []).map((p, i) => ({
+    index: i,
+    name:
       typeof p.name === "string" && p.name.trim()
         ? p.name.trim()
-        : `Page ${i + 1}`;
-    opt.value = `${i + 1}: ${full}`;
-    dl.appendChild(opt);
-  });
+        : `Page ${i + 1}`,
+  }));
 
-  jumperInput.setAttribute("list", "pages-datalist");
+  // ✅ Поповер в body
+  const pop = document.createElement("div");
+  pop.className = "page-jumper-popover";
+  pop.hidden = true;
+  pop.id = "page-jumper-popover";
 
-  // парсер "номер/название"
+  // ✅ Всплывающий инпут для мобайла/compact (как у search)
+  const mobileInputWrap = document.createElement("div");
+  mobileInputWrap.className = "page-jumper-mobile-wrap";
+  mobileInputWrap.hidden = true;
+
+  const mobileInput = document.createElement("input");
+  mobileInput.type = "text";
+  mobileInput.className = "page-jumper-mobile-input";
+  mobileInput.placeholder = "Go to… (№ or name)";
+  mobileInput.autocomplete = "off";
+
+  mobileInputWrap.appendChild(mobileInput);
+  document.body.appendChild(mobileInputWrap);
+
+  let activeIdx = -1;
+
+  const setActive = (newIdx) => {
+    const items = pop.querySelectorAll(".page-jumper-item");
+    items.forEach((el, idx) => el.classList.toggle("active", idx === newIdx));
+    activeIdx = newIdx;
+    if (activeIdx >= 0 && items[activeIdx]) {
+      items[activeIdx].scrollIntoView({ block: "nearest" });
+    }
+  };
+
+  // ✅ Позиционирование в зависимости от режима
+  const positionMobileInput = () => {
+    const isMobile = window.innerWidth <= 900;
+    const isCompact =
+      document.body.classList.contains("compact-900") ||
+      document.body.classList.contains("study-overlay");
+
+    if (isMobile) {
+      // Мобайл: по центру viewport
+      mobileInputWrap.style.left = "50%";
+      mobileInputWrap.style.transform = "translateX(-50%)";
+      mobileInputWrap.style.width = "min(420px, calc(100vw - 24px))";
+    } else if (isCompact) {
+      // Compact: по центру доступной области (справа от панели)
+
+      // Ищем панель по разным возможным селекторам
+      const panel =
+        document.getElementById("study-panel") ||
+        document.querySelector(".study-panel") ||
+        document.querySelector('[class*="panel"]') ||
+        document.querySelector("aside");
+
+      let leftOffset = 0;
+      let availableWidth = window.innerWidth;
+
+      if (panel) {
+        const panelRect = panel.getBoundingClientRect();
+        leftOffset = panelRect.right; // правый край панели
+        availableWidth = window.innerWidth - leftOffset;
+      } else {
+        // Фолбэк: используем #app-header для определения доступной области
+        const header = document.getElementById("app-header");
+        if (header) {
+          const headerRect = header.getBoundingClientRect();
+          leftOffset = headerRect.left;
+          availableWidth = headerRect.width;
+        }
+      }
+
+      // Центр доступной области
+      const centerX = leftOffset + availableWidth / 2;
+      mobileInputWrap.style.left = `${centerX}px`;
+      mobileInputWrap.style.transform = "translateX(-50%)";
+      mobileInputWrap.style.width = `min(420px, ${availableWidth - 24}px)`;
+    }
+  };
+
+  const positionPopover = () => {
+    const isMobile = window.innerWidth <= 900;
+    const isCompact =
+      document.body.classList.contains("compact-900") ||
+      document.body.classList.contains("study-overlay");
+
+    if (isMobile || isCompact) {
+      // Мобайл/Compact: под всплывающим инпутом
+      if (!mobileInputWrap.hidden) {
+        const rect = mobileInput.getBoundingClientRect();
+        pop.style.position = "fixed";
+        pop.style.left = `${rect.left}px`;
+        pop.style.top = `${rect.bottom + 6}px`;
+        pop.style.width = `${rect.width}px`;
+        pop.style.transform = "none";
+        pop.style.right = "auto";
+      } else {
+        // Если инпут скрыт, не показываем поповер
+        pop.hidden = true;
+      }
+    } else {
+      // Десктоп: под инпутом в titlebar
+      const rect = jumperInput.getBoundingClientRect();
+      pop.style.position = "fixed";
+      pop.style.left = `${rect.left}px`;
+      pop.style.top = `${rect.bottom + 6}px`;
+      pop.style.width = "min(320px, 90vw)";
+      pop.style.transform = "none";
+      pop.style.right = "auto";
+    }
+  };
+
+  const openMobileInput = () => {
+    positionMobileInput();
+    mobileInputWrap.hidden = false;
+    mobileInput.value = "";
+    mobileInput.focus();
+  };
+
+  const closeMobileInput = () => {
+    mobileInputWrap.hidden = true;
+    mobileInput.value = "";
+    closePopover();
+  };
+
+  const openPopover = () => {
+    pop.hidden = false;
+    positionPopover();
+    setActive(-1);
+  };
+
+  const closePopover = () => {
+    pop.hidden = true;
+    activeIdx = -1;
+  };
+
   const resolvePageIndex = (q) => {
     const s = (q || "").trim();
     if (!s) return null;
 
-    // чистое число (1-based)
     if (/^\d+$/.test(s)) {
       const idx = Math.max(
         0,
@@ -60,7 +193,7 @@ function mountPageTitleBar(container, page) {
       );
       return idx;
     }
-    // паттерн "12: ..."
+
     const m = s.match(/^(\d+)\s*:/);
     if (m) {
       const idx = Math.max(
@@ -69,7 +202,7 @@ function mountPageTitleBar(container, page) {
       );
       return idx;
     }
-    // поиск по имени (contains, case-insensitive)
+
     const lower = s.toLowerCase();
     const found = (d.pages || []).findIndex((pp, ii) => {
       const nm =
@@ -89,40 +222,8 @@ function mountPageTitleBar(container, page) {
     eventBus.emit("page:switch", { pageIndex: idx });
     eventBus.emit("pagination:scrollTo", { pageIndex: idx });
     jumperInput.blur();
-  };
-
-  // === КАСТОМНОЕ ВЫПАДАЮЩЕЕ МЕНЮ (вместо datalist) ===
-  // ВАЖНО: у wrapper в CSS будет position: relative;
-  const pop = document.createElement("div");
-  pop.className = "page-jumper-popover";
-  pop.hidden = true;
-
-  // Список страниц (имя + индекс)
-  const pages = (d.pages || []).map((p, i) => ({
-    index: i,
-    name:
-      typeof p.name === "string" && p.name.trim()
-        ? p.name.trim()
-        : `Page ${i + 1}`,
-  }));
-
-  let activeIdx = -1; // индекс подсвеченного пункта в поповере
-
-  const openPopover = () => {
-    pop.hidden = false;
-    setActive(-1);
-  };
-  const closePopover = () => {
-    pop.hidden = true;
-    activeIdx = -1;
-  };
-  const setActive = (newIdx) => {
-    const items = pop.querySelectorAll(".page-jumper-item");
-    items.forEach((el, idx) => el.classList.toggle("active", idx === newIdx));
-    activeIdx = newIdx;
-    if (activeIdx >= 0 && items[activeIdx]) {
-      items[activeIdx].scrollIntoView({ block: "nearest" });
-    }
+    mobileInput.blur();
+    closeMobileInput();
   };
 
   const buildList = (q) => {
@@ -131,7 +232,7 @@ function mountPageTitleBar(container, page) {
 
     if (s) {
       if (/^\d+$/.test(s)) {
-        const want = parseInt(s, 10) - 1; // 1-based → 0-based
+        const want = parseInt(s, 10) - 1;
         list = pages.filter((p) => p.index === want);
       } else {
         list = pages.filter((p) => p.name.toLowerCase().includes(s));
@@ -147,11 +248,10 @@ function mountPageTitleBar(container, page) {
       btn.innerHTML = `<span class="num">${
         p.index + 1
       }</span><span class="name">${p.name}</span>`;
-      // mousedown — чтобы успеть выбрать до blur инпута
+
       btn.addEventListener("mousedown", (e) => {
         e.preventDefault();
         jumpTo(p.index);
-        closePopover();
       });
       pop.appendChild(btn);
     });
@@ -159,19 +259,21 @@ function mountPageTitleBar(container, page) {
     openPopover();
   };
 
-  // Показываем/фильтруем меню
+  // ===== События для десктоп-инпута =====
   jumperInput.addEventListener("focus", () => buildList(jumperInput.value));
   jumperInput.addEventListener("input", () => buildList(jumperInput.value));
-  // Закрыть, если ушли фокусом (даём время клику по пункту)
+  jumperInput.addEventListener("click", () => {
+    if (pop.hidden) buildList(jumperInput.value);
+  });
+
   jumperInput.addEventListener("blur", () => setTimeout(closePopover, 120));
 
-  // Клавиатура: ↑/↓, Enter, Esc
-  jumperInput.addEventListener("keydown", (e) => {
+  const handleKeydown = (e, inputEl) => {
     const items = pop.querySelectorAll(".page-jumper-item");
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      if (pop.hidden) buildList(jumperInput.value);
+      if (pop.hidden) buildList(inputEl.value);
       else setActive(Math.min(items.length - 1, activeIdx + 1));
       return;
     }
@@ -185,35 +287,107 @@ function mountPageTitleBar(container, page) {
       if (!pop.hidden && activeIdx >= 0 && items[activeIdx]) {
         const idx = parseInt(items[activeIdx].dataset.index, 10);
         jumpTo(idx);
-        closePopover();
       } else {
-        const idx = resolvePageIndex(jumperInput.value);
+        const idx = resolvePageIndex(inputEl.value);
         jumpTo(idx);
-        closePopover();
       }
       return;
     }
     if (e.key === "Escape") {
       e.preventDefault();
-      closePopover();
+      if (inputEl === mobileInput) {
+        closeMobileInput();
+      } else {
+        closePopover();
+      }
       return;
+    }
+  };
+
+  jumperInput.addEventListener("keydown", (e) => handleKeydown(e, jumperInput));
+
+  // ===== События для мобильного инпута =====
+  mobileInput.addEventListener("input", () => buildList(mobileInput.value));
+  mobileInput.addEventListener("focus", () => buildList(mobileInput.value));
+  mobileInput.addEventListener("blur", () => {
+    setTimeout(() => {
+      if (document.activeElement !== mobileInput) {
+        closeMobileInput();
+      }
+    }, 120);
+  });
+  mobileInput.addEventListener("keydown", (e) => handleKeydown(e, mobileInput));
+
+  jumperWrap.appendChild(jumperInput);
+  document.body.appendChild(pop);
+
+  // Пересчёт позиций
+  window.addEventListener("resize", () => {
+    if (!mobileInputWrap.hidden) {
+      positionMobileInput();
+      if (!pop.hidden) positionPopover();
+    }
+    if (!pop.hidden && mobileInputWrap.hidden) {
+      positionPopover();
     }
   });
 
-  jumperWrap.appendChild(jumperInput);
-  jumperWrap.appendChild(pop);
-  bar.appendChild(jumperWrap);
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (!pop.hidden) positionPopover();
+    },
+    true
+  );
 
-  // --- Заголовок страницы + иконка редактирования ---
+  // ===== Мобильная иконка-триггер =====
+  const gotoTrigger = document.createElement("button");
+  gotoTrigger.type = "button";
+  gotoTrigger.className = "icon-btn goto-trigger";
+  gotoTrigger.title = "Go to page";
+  gotoTrigger.setAttribute("aria-label", "Go to page");
+  gotoTrigger.textContent = "➜";
+
+  gotoTrigger.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!mobileInputWrap.hidden) {
+      closeMobileInput();
+      return;
+    }
+
+    openMobileInput();
+  });
+
+  // Закрытие при клике вне
+  document.addEventListener("click", (e) => {
+    if (
+      !pop.hidden &&
+      !pop.contains(e.target) &&
+      !jumperInput.contains(e.target) &&
+      !mobileInput.contains(e.target) &&
+      !mobileInputWrap.contains(e.target) &&
+      !gotoTrigger.contains(e.target)
+    ) {
+      closePopover();
+      closeMobileInput();
+    }
+  });
+
+  // ===== Заголовок + редактирование =====
+  const titleWrap = document.createElement("div");
+  titleWrap.className = "page-title-wrap";
+
   const title = document.createElement("span");
-  title.className = "page-title-text";
+  title.className = "page-title page-title-text";
   title.textContent = page.name || `Page ${page.index + 1}`;
 
   const edit = document.createElement("button");
   edit.className = "page-edit-icon ui-icon-btn ui-icon-16";
   edit.title = "Rename page";
   edit.type = "button";
-  edit.textContent = "↻";
+  edit.textContent = "✎";
 
   const enterEdit = () => {
     const wrap = document.createElement("div");
@@ -239,7 +413,6 @@ function mountPageTitleBar(container, page) {
         const idx = d.currentPageIndex || 0;
         if (d.pages[idx]) d.pages[idx].name = next;
       });
-      // перерендер придёт по storage:updated
     };
     const cancel = () => {
       renderCurrentPage();
@@ -263,10 +436,10 @@ function mountPageTitleBar(container, page) {
   });
   title.addEventListener("dblclick", enterEdit);
 
-  //bar.appendChild(title);
-  //bar.appendChild(edit);
+  titleWrap.appendChild(title);
+  titleWrap.appendChild(edit);
 
-  // --- Collapse/Expand ALL sections on this page ---
+  // ===== Свернуть/развернуть все =====
   const computeAllCollapsed = () => {
     const dnow = storage.get();
     const p = dnow.pages[dnow.currentPageIndex || 0];
@@ -280,12 +453,12 @@ function mountPageTitleBar(container, page) {
       const p = d.pages[d.currentPageIndex || 0];
       Object.values(p.sections || {}).forEach((s) => (s.collapsed = !!next));
     });
-    // Ререндер придёт через storage:updated → mountPageTitleBar вызовется снова
   };
 
   const allToggle = document.createElement("button");
   allToggle.type = "button";
-  allToggle.className = "page-collapse-all ui-icon-btn ui-icon-16";
+  allToggle.className = "page-fold-toggle ui-icon-btn ui-icon-16";
+
   const refreshAllToggle = () => {
     const all = computeAllCollapsed();
     allToggle.textContent = all ? "▸▸" : "▾▾";
@@ -297,24 +470,35 @@ function mountPageTitleBar(container, page) {
     e.preventDefault();
     const next = !computeAllCollapsed();
     setAllCollapsed(next);
+    refreshAllToggle();
   });
-  // Кнопка "свернуть/развернуть все" — сразу после джампера
+
+  // ===== Сборка бара =====
   bar.appendChild(allToggle);
-  // порядок в баре: [jumper]  [title] [edit] [allToggle]
-  bar.appendChild(title);
-  bar.appendChild(edit);
-  //bar.appendChild(allToggle);
+  bar.appendChild(titleWrap);
+  bar.appendChild(jumperWrap);
+  bar.appendChild(gotoTrigger);
 
   container.appendChild(bar);
 }
 
-// =============================================================================
-// РЕНДЕРИНГ ТЕКУЩЕЙ СТРАНИЦЫ
-// =============================================================================
-/**
- * Отрендерить содержимое текущей страницы (секции + кнопки)
- * Эта функция перерисовывает весь контент внутри #app-body
- */
+/* =============================================================================
+   📋 ЧТО ИЗМЕНИЛОСЬ v3:
+   
+   1. Добавлен всплывающий инпут (.page-jumper-mobile-wrap) для мобайла/compact
+   
+   2. positionMobileInput() центрирует инпут:
+      - Мобайл: по центру viewport
+      - Compact: по центру LinkApp (левый блок с #app-body)
+   
+   3. Поповер показывается ПОД всплывающим инпутом
+   
+   4. При клике на иконку ➜ открывается инпут + поповер со списком
+   
+   5. ESC закрывает и инпут и поповер
+   
+   ============================================================================= */
+
 export function renderCurrentPage() {
   const container = document.getElementById("app-body");
   if (!container) {

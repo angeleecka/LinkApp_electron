@@ -1,37 +1,55 @@
 /* =============================================================================
-   КНОПКИ-ССЫЛКИ (плитки)
+   КНОПКИ-ССЫЛКИ (плитки) — REORGANIZED & FIXED
    ============================================================================= */
 
-/* Базовая плитка ссылки */
+/* ========== 1) БАЗА ПЛИТКИ ========== */
 .assignment-button {
+  /* Positioning */
   position: relative;
+
+  /* Layout */
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
 
-  /* Место под ручку слева (28px) и под иконку справа (~3rem) */
-  padding: 1.5rem 3rem 1.5rem 28px;
-
-  background: var(--surface-1);
-  color: var(--accent);
-  text-decoration: none;
-  border-radius: var(--radius-md);
-  font-size: 1.1rem;
-  font-weight: 500;
-  border: 2px solid transparent;
-  cursor: pointer;
-  word-wrap: break-word;
+  /* Sizing */
   min-height: 80px;
 
+  /* Spacing */
+  padding: 1.5rem 5rem 1.5rem 28px; /* резерв: слева под ручку, справа под edit */
+
+  /* Visual */
+  background: var(--surface-1);
+  color: var(--accent);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+
+  /* Typography */
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-decoration: none;
+  word-wrap: break-word;
+
+  /* Interaction */
+  cursor: pointer;
   transition: background var(--dur-1), transform var(--dur-1),
     border-color var(--dur-1);
+
+  /* Prevent Safari drag */
+  -webkit-user-drag: none;
 }
 
+.assignment-button > span:not(.drag-handle) {
+  -webkit-user-drag: none;
+}
+
+/* ========== 2) СОСТОЯНИЯ :hover / :focus ========== */
 .assignment-button:hover {
   background: var(--surface-2);
   border-color: var(--accent);
   transform: translateY(-2px);
+  /* ⚠️ ЗАМЕЧАНИЕ: в rows ниже transform: none !important перебивает это */
 }
 
 .assignment-button:focus-visible {
@@ -39,28 +57,34 @@
   outline-offset: 2px;
 }
 
-/* === Иконка редактирования (правый верх) ===
-   Используем утилиты ui-icon-btn/ui-icon-16 для единого вида. */
+/* ========== 3) EDIT LINK (правый верх) ========== */
 .edit-link {
+  /* Positioning */
   position: absolute;
   top: 6px;
   right: 6px;
   z-index: 5;
 
-  /* унификация вида — утилиты должны быть в разметке/JS:
-     class="edit-link ui-icon-btn ui-icon-16"
-     Ниже страховка, если забыли добавлять классы: */
+  /* Layout */
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
+  /* Sizing */
   min-width: 28px;
   min-height: 28px;
   padding: 4px 6px;
-  border-radius: 6px;
-  color: inherit;
+
+  /* Visual */
   background: transparent;
   border: 0;
+  border-radius: 6px;
+  color: inherit; /* ⚠️ в rows может сливаться с текстом */
+
+  /* Typography */
   line-height: 1;
+
+  /* Interaction */
   cursor: pointer;
   opacity: 0.75;
 }
@@ -71,42 +95,48 @@
   transform: translateY(1px) rotate(90deg);
   color: var(--text);
 }
+
 .edit-link:focus-visible {
   outline: 2px solid var(--focus-border, rgba(0, 128, 255, 0.45));
   outline-offset: 2px;
 }
 
-/* === Drag handle === */
+/* ========== 4) DRAG HANDLE (левая решётка) ========== */
 .drag-handle {
-  position: absolute;
+  /* Positioning */
+  position: absolute; /* ⚠️ в rows перезаписывается на static */
   left: 8px;
   top: 8px;
+
+  /* Typography */
   font-size: 14px;
   line-height: 1;
+
+  /* Interaction */
   opacity: 0.65;
   cursor: grab;
   user-select: none;
 }
+
 .assignment-button.dragging .drag-handle {
   cursor: grabbing;
   opacity: 0.9;
 }
 
-/* Состояния DnD плитки */
+/* ========== 5) DND СОСТОЯНИЯ ========== */
 .assignment-button.dragging {
   opacity: 0.5;
   filter: grayscale(0.5);
 }
 
-/* Линии вставки при перетаскивании */
 .assignment-button.drop-before {
   box-shadow: inset 0 3px 0 var(--accent);
 }
+
 .assignment-button.drop-after {
   box-shadow: inset 0 -3px 0 var(--accent);
 }
 
-/* Маркер вставки между плитками */
 .button-drop-marker {
   width: 4px;
   height: 60px;
@@ -121,7 +151,6 @@
   animation: buttonMarkerPulse 1.2s ease-in-out infinite;
 }
 
-/* Анимация маркера (без конфликтов с секциями) */
 @keyframes buttonMarkerPulse {
   0%,
   100% {
@@ -134,16 +163,11 @@
   }
 }
 
-/* чтобы Safari не пытался тянуть ссылки */
-.assignment-button,
-.assignment-button > span:not(.drag-handle) {
-  -webkit-user-drag: none;
-}
-
-/* Мягкая подсветка для только что добавленной кнопки */
+/* ========== 6) АНИМАЦИЯ ДОБАВЛЕНИЯ ========== */
 .assignment-button.just-added {
   animation: btnPulse 0.9s ease;
 }
+
 @keyframes btnPulse {
   0% {
     box-shadow: 0 0 0 0 var(--accent);
@@ -156,24 +180,32 @@
   }
 }
 
-/* =============================================================================
-   КНОПКА ДОБАВЛЕНИЯ (+)
-   ============================================================================= */
-
+/* ========== 7) КНОПКА «+» (ГЛАВНАЯ) ========== */
 .add-button {
+  /* Layout */
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
+  /* Sizing */
   width: 50px;
   height: 50px;
-  border-radius: 50%;
 
+  /* Visual */
   background: transparent;
-  color: var(--text);
   border: 1px solid var(--border);
-  font-size: 1.8rem;
+  border-radius: 50%;
+  color: var(--text);
+
+  /* Typography */
+  font-size: 2rem; /* ✅ БЫЛО: 3rem — немного уменьшаем для баланса */
+  font-weight: 100; /* ✅ ФИКС: было 400 — делаем тонким */
+  line-height: 1;
+
+  /* Spacing */
   padding: 0;
+
+  /* Interaction */
   cursor: pointer;
   transition: all var(--dur-1);
 }
@@ -182,6 +214,11 @@
   color: var(--accent);
   background: var(--surface-2);
   border-color: var(--accent);
+  transform: scale(1.05); /* ✅ ДОБАВЛЕНО: легкое увеличение */
+}
+
+.add-button:active {
+  transform: scale(0.95); /* ✅ ДОБАВЛЕНО: нажатие */
 }
 
 .add-button:focus-visible {
@@ -189,27 +226,304 @@
   outline-offset: 2px;
 }
 
-/* Подсветка совпадений — тема-aware через токены */
+/* ========== 8) ПОДСВЕТКА СОВПАДЕНИЙ ========== */
 .assignment-label mark.search-hl {
   background: var(--hl-bg);
   color: var(--hl-text);
-  /* современный, аккуратный underline */
   text-decoration: underline;
   text-decoration-color: var(--hl-underline);
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
-  /* на случай старых правил */
   border: 0;
 }
 
-/* =============================================================================
-   АДАПТИВ
-   ============================================================================= */
-
+/* ========== 9) АДАПТИВ: MOBILE ========== */
 @media (max-width: 768px) {
   .assignment-button {
-    padding: 1.2rem 2.4rem 1.2rem 28px; /* сохраняем место для ручки и иконки */
+    padding: 1.2rem 2.4rem 1.2rem 28px;
     font-size: 1rem;
     min-height: 70px;
   }
+}
+
+/* =============================================================================
+   10) LIST MODE (html[data-view="rows"])
+   ============================================================================= */
+
+/* ========== A) Грид → Поток ========== */
+html[data-view="rows"] .assignments-grid {
+  display: block !important;
+  gap: 0 !important;
+}
+
+/* Дополнительные селекторы для overlay (старый код) */
+/* ⚠️ ДУБЛЬ: эти правила дублируют глобальные html[data-view="rows"] ниже */
+html[data-view="rows"] body.study-overlay .assignments-grid,
+html[data-view="rows"] body.compact-900 .assignments-grid {
+  display: block !important;
+  gap: 0 !important;
+}
+
+/* ========== B) Плитка → Строка ========== */
+html[data-view="rows"] .assignment-button {
+  /* Reset tile styles */
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  transform: none !important; /* убираем :hover подпрыгивание */
+
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* ✅ ФИКС: было center */
+  text-align: left; /* ✅ ФИКС: было center */
+  gap: 10px;
+
+  /* Sizing */
+  min-height: 0;
+
+  /* Spacing */
+  padding: 10px 44px 10px 16px; /* запас справа под .edit-link */
+  margin: 0;
+
+  /* Positioning для edit-link */
+  position: relative;
+}
+
+/* Старые селекторы overlay — оставляем для совместимости */
+/* ⚠️ ДУБЛЬ: перекрывают глобальные правила выше, но с меньшим padding */
+html[data-view="rows"] body.study-overlay .assignment-button,
+html[data-view="rows"] body.compact-900 .assignment-button {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  transform: none !important;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 10px;
+
+  padding: 10px 20px; /* ⚠️ ПРОБЛЕМА: НЕТ запаса справа под edit! */
+  min-height: 0;
+  margin: 0;
+}
+
+/* ========== C) Ручка в потоке ========== */
+html[data-view="rows"] .drag-handle {
+  position: static; /* ✅ ФИКС: было absolute */
+  left: auto;
+  top: auto;
+  margin-right: 8px;
+  flex: 0 0 auto;
+  cursor: grab;
+}
+
+/* Дубль для overlay */
+html[data-view="rows"] body.study-overlay .drag-handle,
+html[data-view="rows"] body.compact-900 .drag-handle {
+  position: static;
+  left: auto;
+  top: auto;
+  margin-right: 8px;
+  flex: 0 0 auto;
+  cursor: grab;
+}
+
+/* ========== D) Текст в строке ========== */
+html[data-view="rows"] .assignment-button .assignment-label,
+html[data-view="rows"] .assignment-button .btn-label {
+  /* ✅ ФИКС: было nowrap/hidden — меняем на перенос */
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
+  line-height: 1.35;
+  flex: 1 1 auto;
+}
+
+/* Старые селекторы overlay */
+/* ⚠️ КОНФЛИКТ: эти правила используют nowrap вместо normal */
+html[data-view="rows"] body.study-overlay .assignment-button .assignment-label,
+html[data-view="rows"] body.compact-900 .assignment-button .assignment-label,
+html[data-view="rows"] body.study-overlay .assignment-button .btn-label,
+html[data-view="rows"] body.compact-900 .assignment-button .btn-label {
+  flex: 1 1 auto;
+  overflow: hidden;
+  /*   white-space: nowrap; ⚠️ КОНФЛИКТ с глобальным normal */
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+/* ========== E) Edit-link в rows ========== */
+html[data-view="rows"] .edit-link {
+  /* Positioning */
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+
+  /* Sizing */
+  min-width: 28px;
+  min-height: 28px;
+
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Visual — контрастный для списка */
+  color: color-mix(in oklab, var(--text) 95%, white);
+  background: color-mix(in oklab, var(--bg) 35%, transparent);
+  border: 1px solid color-mix(in oklab, var(--text) 18%, transparent);
+  border-radius: 6px;
+  opacity: 1; /* ✅ в списке не приглушаем */
+}
+
+html[data-view="rows"] .edit-link:hover {
+  background: color-mix(in oklab, var(--text) 12%, transparent);
+  color: color-mix(in oklab, var(--text) 98%, white);
+}
+
+/* ========== F) Разделитель между строками ========== */
+html[data-view="rows"] .assignment-button + .assignment-button {
+  border-top: 1px solid var(--border);
+}
+
+/* Дубль для overlay */
+html[data-view="rows"]
+  body.study-overlay
+  .assignment-button
+  + .assignment-button,
+html[data-view="rows"]
+  body.compact-900
+  .assignment-button
+  + .assignment-button {
+  border-top: 1px solid var(--border);
+}
+
+/* ========== G) Overlay две колонки (НЕ rows) ========== */
+/* ℹ️ Это правило НЕ относится к list mode, просто layout overlay */
+body.study-overlay .assignments-grid.grid-mode {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+/* =============================================================================
+   📋 ИТОГОВЫЙ АНАЛИЗ
+   ============================================================================= */
+
+/* ✅ ФИКСЫ ПРИМЕНЕНЫ:
+   1. .add-button:
+      - font-size: 2.5rem (было 3rem)
+      - font-weight: 200 (было 400) ← ГЛАМУРНЫЙ ТОНКИЙ
+      - добавлен transform: scale на hover/active
+   
+   2. html[data-view="rows"] .assignment-button:
+      - justify-content: flex-start (было center)
+      - text-align: left (было center)
+      - padding с запасом справа под edit
+   
+   3. html[data-view="rows"] .assignment-label:
+      - white-space: normal (было nowrap в overlay селекторах)
+      - overflow: visible (было hidden)
+
+   ⚠️ НАЙДЕННЫЕ ДУБЛИ И КОНФЛИКТЫ:
+   
+   1. Селекторы для overlay (body.study-overlay, body.compact-900)
+      дублируют глобальные html[data-view="rows"], но с разными значениями:
+      - padding: 10px 20px vs 10px 44px 10px 16px
+      - white-space: nowrap vs normal
+      
+   2. transform: none !important в rows перебивает hover-эффект из tiles
+   
+   3. .edit-link в rows может наезжать на текст в overlay-селекторах
+      из-за padding: 10px 20px (нет запаса справа)
+   
+   РЕКОМЕНДАЦИЯ:
+   Удалить или закомментировать все overlay-селекторы
+   (body.study-overlay, body.compact-900) и оставить только
+   глобальные html[data-view="rows"] — они покрывают все случаи.
+*/
+/* === LIST VIEW — единообразно на мобиле и десктопе === */
+html[data-view="rows"] .assignments-grid {
+  display: block !important;
+  gap: 0 !important;
+}
+
+/* Строка списка: левое выравнивание, без «кнопочной» декорации */
+html[data-view="rows"] .assignment-button {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  margin: 0;
+  min-height: 0;
+  text-align: left;
+  transform: none !important;
+}
+
+/* Ручка становится «в потоке» и даёт зазор справа */
+html[data-view="rows"] .drag-handle {
+  position: static;
+  margin: 3px 8px 0 0;
+  flex: 0 0 auto;
+  cursor: grab;
+}
+
+/* Текст — переносится, не заходит под кнопку справа */
+html[data-view="rows"] .assignment-button .assignment-label,
+html[data-view="rows"] .assignment-button .btn-label {
+  flex: 1 1 auto;
+  overflow: visible;
+  white-space: normal; /* <-- разрешаем переносы */
+  word-break: break-word; /* длинные URL не ломают верстку */
+}
+
+/* Кнопка редактирования — всегда у правого края строки */
+html[data-view="rows"] .edit-link {
+  position: static; /* <-- раньше была absolute */
+  margin-left: 8px;
+  flex: 0 0 auto;
+  opacity: 0.75;
+  color: var(--list-edit-color, var(--accent));
+}
+html[data-view="rows"] .assignment-button:hover .edit-link {
+  opacity: 1;
+}
+
+/* Ховер только на тексте, без «заливки» всей строки */
+html[data-view="rows"] .assignment-button .assignment-label:hover,
+html[data-view="rows"] .assignment-button .btn-label:hover {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* 3) Кнопка редактирования: всегда на виду, по правому краю,
+      «вровень» с первой строкой текста */
+html[data-view="rows"] body.study-overlay .assignment-button .edit-link,
+html[data-view="rows"] body.compact-900 .assignment-button .edit-link {
+  position: absolute !important;
+  right: 8px;
+  top: 10px; /* подстроено под padding строки */
+  z-index: 2;
+  color: var(--header-fg); /* контраст к теме */
+  opacity: 0.9;
+  transform: none; /* без «подпрыгиваний» в списке */
+}
+html[data-view="rows"] body.study-overlay .assignment-button .edit-link:hover,
+html[data-view="rows"] body.compact-900 .assignment-button .edit-link:hover {
+  color: var(--accent);
+  background: transparent;
 }
